@@ -65,7 +65,7 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     ## x: array of datetimes, x: data to plot
     ## yTuple: ('variable name', 'units'), saveDir
     x = mDate.date2num(x) # convert datetime to matplotlib time
-    yMa = np.ma.masked_outside(y, y.mean() - 50*y.std(), y.mean() + 50*y.std())
+    yMa = np.ma.masked_outside(y, y.mean() - 2*y.std(), y.mean() + 2*y.std())
     ymin = np.min(yMa)
     ymax = np.max(yMa)
     nMa = np.ma.count_masked(yMa)
@@ -105,7 +105,7 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     ax.legend(["Maximum: %f" % ymax 
     + "\nMinimum: %f" % ymin 
     + "\nMean: %f" % np.mean(yMa) 
-    + "\n# Masked (+/- 50stdev): %d " % nMa], loc='best')
+    + "\n# Masked (+/-  2 stdev): %d " % nMa], loc='best')
     ax.set_xlabel('Time (UTC)') # x label
     ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
     ax.set_title(fName) # title
@@ -200,7 +200,7 @@ def createDir(newDir):
 
 # ncFile = '/Users/michaesm/Documents/MATLAB/CP05G004_GL004_03-CTDGVM000_telemetered_ctdgv_m_glider_instrument_2014-10-06T235844Z-2014-10-20T235844Z.nc'
 #Group 1b
-# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdbp_no/ctdbp_no_sample_L1.nc'
+ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdbp_no/ctdbp_no_sample_L1.nc'
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdpf_sbe43/ctdpf_sbe43_sample_L1.nc'
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/thsph/thsph_sample_L1.nc'
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/velpt/velpt_velocity_data_L1.nc'
@@ -214,10 +214,10 @@ def createDir(newDir):
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/optaa/optaa_sample_L1.nc'
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/prest/prest_real_time_L1.nc'
 # ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/spikr/spkir_data_record_L1.nc'
-ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/tmpsf/tmpsf_sample_L0.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/tmpsf/tmpsf_sample_L0.nc'
 
 #Group 4
-#ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_optode/ctdpf_optode_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_optode/ctdpf_optode_sample_L1.nc'
 
 fName = getFileName(ncFile)
 createLineSpace()
@@ -314,7 +314,7 @@ for groups in gLibUse:
                     pass
                 yI = (var, yU, var) # name, unit, name
                 secs = (t1-t0).total_seconds()
-                yMa = np.ma.masked_outside(yD, yD.mean() - 50*yD.std(), yD.mean() + 50*yD.std())
+                yMa = np.ma.masked_outside(yD, yD.mean() - 2*yD.std(), yD.mean() + 2*yD.std())
                 yMin = np.min(yMa)
                 yMax = np.max(yMa)
                 yI = yI + (yMin,yMax,)
