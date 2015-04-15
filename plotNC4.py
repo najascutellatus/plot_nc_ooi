@@ -31,7 +31,7 @@ def definePlot():
     print "Time Series (Time vs. Variable): 1"
     print "Depth Profile (Time vs. Pressure colored by Sensor Variable): 2"
     print "Line Chart (x Variable vs. y Variable): 3" 
-    pltType = raw_input("Enter number (Enter <1>): ") or '1'
+    pltType = raw_input("Enter plot type number (Enter <1>): ") or '1'
     return plotDict[pltType]
 
 def getFileName(dirStr):
@@ -84,15 +84,16 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     plt.rcParams["figure.figsize"] = fig_size
     
     # setup axes
+    plt.ylim((yTuple[3], yTuple[4]))
     ax.xaxis.set_minor_locator(minorLocator)
     xax = ax.get_xaxis().get_major_formatter()
 
     xax.scaled = {
-        365.0 : '%Y', # data longer than a year
+        365.0 : '%Y-M', # data longer than a year
         30.   : '%Y-m\n%d', # set the > 1m < 1Y scale to Y-m
         1.0   : '%b-%d\n%H:%M', # set the > 1d < 1m scale to Y-m-d
         1./24.: '%b-%d\n%H:%M', # set the < 1d scale to H:M
-        1./48.: '%H:%M:%S',
+        1./48.: '%b-%d\n%H:%M:%S',
     }
     
     y_formatter = ticker.ScalarFormatter(useOffset=False)
@@ -109,20 +110,30 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
     ax.set_title(fName) # title
 
-    ts1, ts2 = minmax(x)
+    ts1 = min(x)
+    ts2 = max(x)
     ts1 = mDate.num2date(ts1)
     ts2 = mDate.num2date(ts2)
     tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S') 
-    folderType = saveSubDir(ts1, ts2)
-    tempDir = os.path.join(saveDir, folderType)
-    createDir(tempDir)
-    saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tStr  
-    sDir = os.path.join(tempDir, saveFileName)
     
-    plt.savefig(sDir,dpi=100) # save figure
+    fListing = 0
+    tFormatDir = timeRecordIndicator(ts1, ts2)
+    
+    if fListing == 1:
+        tempDir = os.path.join(saveDir, tFormatDir)
+        createDir(tempDir)
+        saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tFormatDir + '-' + tStr  
+        sDir = os.path.join(tempDir, saveFileName)
+    else:
+        createDir(saveDir)
+        saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tFormatDir + '-' + tStr  
+        sDir = os.path.join(saveDir, saveFileName)
+        
+        
+    plt.savefig(str(sDir),dpi=100) # save figure
     plt.close()
     
-def saveSubDir(t0, t1):
+def timeRecordIndicator(t0, t1):
     tSec = (t1-t0).total_seconds()
     
     if (tSec <= 3600):
@@ -136,8 +147,8 @@ def saveSubDir(t0, t1):
     return fStr
 
 def buildTimes(t0, t1, secs):
-    tH = t0 + timedelta(hours=4)
-    tD = t0 + timedelta(days=2)
+    tH = t0 + timedelta(hours=2)
+    tD = t0 + timedelta(days=1)
     if secs < 3600*24: # less than a day
         hour = rangeTimes(HOURLY, t0, tH)
         timeAry = np.concatenate((hour,record), axis=0)
@@ -174,11 +185,6 @@ def subsampleData(xArray, yArray, t0, t1):
     xTemp = xArray[np.where((xArray>= t0) & (xArray <=t1))]
     yTemp = yArray[np.where((xArray>= t0) & (xArray <=t1))]
     return xTemp, yTemp
-
-def minmax(thisList):
-    t0 = min(thisList)
-    t1 = max(thisList)
-    return t0, t1
     
 def createDir(newDir):
     # Check if dir exists.. if it doesn't... create it.
@@ -193,7 +199,26 @@ def createDir(newDir):
 ####################################################################
 
 # ncFile = '/Users/michaesm/Documents/MATLAB/CP05G004_GL004_03-CTDGVM000_telemetered_ctdgv_m_glider_instrument_2014-10-06T235844Z-2014-10-20T235844Z.nc'
-ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdbp_no/ctdbp_no_sample_L1.nc'
+#Group 1b
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdbp_no/ctdbp_no_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdpf_sbe43/ctdpf_sbe43_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/thsph/thsph_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/velpt/velpt_velocity_data_L1.nc'
+
+#Group2A
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_sbe43/ctdpf_sbe43_sample.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/nutnr/nutnr_a_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/trhph/trhph_sample_L1.nc'
+
+#Group 3
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/optaa/optaa_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/prest/prest_real_time_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/spikr/spkir_data_record_L1.nc'
+ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/tmpsf/tmpsf_sample_L0.nc'
+
+#Group 4
+#ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_optode/ctdpf_optode_sample_L1.nc'
+
 fName = getFileName(ncFile)
 createLineSpace()
 saveDir = str(raw_input("Select save directory <Enter for %s>: "%os.getcwd())) or os.getcwd()
@@ -257,7 +282,8 @@ for groups in gLibUse:
         xD = xVar[:]
         xUnits = str(xVar.units)
         xD = nc.num2date(xD, xUnits) # nc time to datetime
-        t0, t1 = minmax(xD) # get time min and max
+        t0 = min(xD)
+        t1 = max(xD) # get time min and max
         record = np.array([[t0,t1]])
 
         #Ask user for Y axis (sensor)
@@ -288,12 +314,20 @@ for groups in gLibUse:
                     pass
                 yI = (var, yU, var) # name, unit, name
                 secs = (t1-t0).total_seconds()
+                yMa = np.ma.masked_outside(yD, yD.mean() - 50*yD.std(), yD.mean() + 50*yD.std())
+                yMin = np.min(yMa)
+                yMax = np.max(yMa)
+                yI = yI + (yMin,yMax,)
 
                 timeAry = buildTimes(t0, t1, secs)
 
                 for t in timeAry:
                     xT, yT = subsampleData(xD, yD, t[0], t[1])
-                    plotTimeSeries(xT, yT, yI, groupDir)
+                    
+                    if len(xT) == 0:
+                        continue
+                    else:
+                        plotTimeSeries(xT, yT, yI, groupDir)
 
 # elif pltType == 'profile':
 #     # print "******************************************************"
