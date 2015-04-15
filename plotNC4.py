@@ -1,7 +1,8 @@
 import os,sys,time
-import netCDF4
+import netCDF4 as nc
 import numpy as np
-import pylab,datetime
+import pylab
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt 
 import matplotlib.dates as mDate
 import matplotlib.ticker as ticker
@@ -15,7 +16,7 @@ You can create time series, depth profiles, and regular line plots
 '''
 
 ################################################################################
-# Helper Functions 
+# Functions 
 ################################################################################
 
 def createLineSpace():
@@ -30,7 +31,7 @@ def definePlot():
     print "Time Series (Time vs. Variable): 1"
     print "Depth Profile (Time vs. Pressure colored by Sensor Variable): 2"
     print "Line Chart (x Variable vs. y Variable): 3" 
-    pltType = raw_input("Enter number (Enter <1>): ") or '1'
+    pltType = raw_input("Enter plot type number (Enter <1>): ") or '1'
     return plotDict[pltType]
 
 def getFileName(dirStr):
@@ -68,7 +69,6 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     ymin = np.min(yMa)
     ymax = np.max(yMa)
     nMa = np.ma.count_masked(yMa)
-    # print nMa
       
     fig,ax = plt.subplots()
     minorLocator = ticker.AutoMinorLocator()
@@ -84,15 +84,16 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     plt.rcParams["figure.figsize"] = fig_size
     
     # setup axes
+    plt.ylim((yTuple[3], yTuple[4]))
     ax.xaxis.set_minor_locator(minorLocator)
     xax = ax.get_xaxis().get_major_formatter()
 
     xax.scaled = {
-        365.0 : '%Y', # data longer than a year
+        365.0 : '%Y-M', # data longer than a year
         30.   : '%Y-m\n%d', # set the > 1m < 1Y scale to Y-m
         1.0   : '%b-%d\n%H:%M', # set the > 1d < 1m scale to Y-m-d
         1./24.: '%b-%d\n%H:%M', # set the < 1d scale to H:M
-        1./48.: '%H:%M:%S',
+        1./48.: '%b-%d\n%H:%M:%S',
     }
     
     y_formatter = ticker.ScalarFormatter(useOffset=False)
@@ -101,7 +102,6 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     plt.grid()
     
     # setup labels and title
-    
     ax.legend(["Maximum: %f" % ymax 
     + "\nMinimum: %f" % ymin 
     + "\nMean: %f" % np.mean(yMa) 
@@ -110,54 +110,81 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
     ax.set_title(fName) # title
 
-    ts1, ts2 = minmax(x)
+    ts1 = min(x)
+    ts2 = max(x)
     ts1 = mDate.num2date(ts1)
     ts2 = mDate.num2date(ts2)
-    tStr = ts1.strftime('%Y-%m-%dT%H%M%S') 
-    + '_' + ts2.strftime('%Y-%m-%dT%H%M%S') 
-    folderType = saveSubDir(ts1, ts2)
-    tempDir = os.path.join(saveDir, folderType)
-    createDir(tempDir)
-    saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tStr  
-    sDir = os.path.join(tempDir, saveFileName)
+    tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S') 
     
-    plt.savefig(sDir,dpi=100) # save figure
+    fListing = 0
+    tFormatDir = timeRecordIndicator(ts1, ts2)
+    
+    if fListing == 1:
+        tempDir = os.path.join(saveDir, tFormatDir)
+        createDir(tempDir)
+        saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tFormatDir + '-' + tStr  
+        sDir = os.path.join(tempDir, saveFileName)
+    else:
+        createDir(saveDir)
+        saveFileName = fName + '-' + yTuple[0] + '-timeseries-' + tFormatDir + '-' + tStr  
+        sDir = os.path.join(saveDir, saveFileName)
+        
+        
+    plt.savefig(str(sDir),dpi=100) # save figure
     plt.close()
     
-def saveSubDir(t0, t1):
+def timeRecordIndicator(t0, t1):
     tSec = (t1-t0).total_seconds()
     
-    if (tSec < 3600*24*7):
+    if (tSec <= 3600):
+        fStr = 'hourly'
+    elif (tSec > 3600 and tSec <= 3600*24):
         fStr = 'daily'
-    elif (tSec >= 3600*24*7 and tSec < 3600*24*7*4):
+    elif (tSec > 3600*24 and tSec <= 3600*24*7):
         fStr = 'weekly'
-    elif (tSec > 3600*24*7*4):
+    elif (tSec > 3600*24*7 and tSec <= 3600*24*7*4):
         fStr = 'monthly'
     return fStr
-    
-def returnTimeFrequencies(freq, t0, t1):
+
+def buildTimes(t0, t1, secs):
+    tH = t0 + timedelta(hours=2)
+    tD = t0 + timedelta(days=1)
+    if secs < 3600*24: # less than a day
+        hour = rangeTimes(HOURLY, t0, tH)
+        timeAry = np.concatenate((hour,record), axis=0)
+    elif (secs >= 3600*24 and secs < 3600*24*7):
+        hour = rangeTimes(HOURLY, t0, tH) # one hour
+        day = rangeTimes(DAILY, t0, tD) 
+        timeAry = np.concatenate((hour,day,record), axis=0)
+    elif (secs >= 3600*24*7 and secs < 3600*24*7*4):
+        hour = rangeTimes(HOURLY, t0, tH)
+        day = rangeTimes(DAILY, t0, tD)
+        week = rangeTimes(WEEKLY, t0, t1)
+        timeAry = np.concatenate((hour,day,week,record), axis=0)
+    elif (secs >= 3600*24*7*4):
+        hour = rangeTimes(HOURLY, t0, tH)
+        day = rangeTimes(DAILY, t0, tD)
+        week = rangeTimes(WEEKLY, t0, t1)
+        month = rangeTimes(MONTHLY, t0, t1)
+        timeAry = np.concatenate((hour,day,week,month,record), axis=0)
+    return timeAry
+        
+def rangeTimes(freq, tS, tE):
     # Function returns a list of times between two datetimes
     # Where freq must be one of YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, or SECONDLY.
-    timeList = list(rrule(freq, dtstart=t0, until=t1))
-    timeList.append(t1)
+    timeList = list(rrule(freq, dtstart=tS, until=tE))
+#    timeList.append(tE)
     arr = np.empty((0,2))
     for tStart, tEnd in zip(timeList, timeList[1:]):
         arr = np.append(arr, np.array([[tStart,tEnd]]),0)    
     return arr
 
-def returnDataBetweenTimes(xArray, yArray, t0, t1):
+def subsampleData(xArray, yArray, t0, t1):
     # This function returns data (x,y) between start time and end time
     # mpl datenum array, y data, start datetime, end datetime
-    #t0 = mDate.date2num(t0)
-    #t1 = mDate.date2num(t1)
     xTemp = xArray[np.where((xArray>= t0) & (xArray <=t1))]
     yTemp = yArray[np.where((xArray>= t0) & (xArray <=t1))]
     return xTemp, yTemp
-
-def minmax(thisList):
-    t0 = min(thisList)
-    t1 = max(thisList)
-    return t0, t1
     
 def createDir(newDir):
     # Check if dir exists.. if it doesn't... create it.
@@ -170,11 +197,28 @@ def createDir(newDir):
             else:
                 raise
 ####################################################################
-####################################################################
-####################################################################
 
-#ncFile = '/Users/michaesm/Documents/MATLAB/CP05G004_GL004_03-CTDGVM000_telemetered_ctdgv_m_glider_instrument_2014-10-06T235844Z-2014-10-20T235844Z'
+# ncFile = '/Users/michaesm/Documents/MATLAB/CP05G004_GL004_03-CTDGVM000_telemetered_ctdgv_m_glider_instrument_2014-10-06T235844Z-2014-10-20T235844Z.nc'
+#Group 1b
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdbp_no/ctdbp_no_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/ctdpf_sbe43/ctdpf_sbe43_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/thsph/thsph_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group1B/velpt/velpt_velocity_data_L1.nc'
+
+#Group2A
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_sbe43/ctdpf_sbe43_sample.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/nutnr/nutnr_a_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/trhph/trhph_sample_L1.nc'
+
+#Group 3
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/optaa/optaa_sample_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/prest/prest_real_time_L1.nc'
+# ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/spikr/spkir_data_record_L1.nc'
 ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/tmpsf/tmpsf_sample_L0.nc'
+
+#Group 4
+#ncFile = '/Users/michaesm/Documents/projects/ooi/rsn_data/Group2A3/ctdpf_optode/ctdpf_optode_sample_L1.nc'
+
 fName = getFileName(ncFile)
 createLineSpace()
 saveDir = str(raw_input("Select save directory <Enter for %s>: "%os.getcwd())) or os.getcwd()
@@ -182,7 +226,7 @@ saveMainDir = os.path.join(saveDir, fName)
 
 createDir(saveMainDir)
             
-f = netCDF4.Dataset(ncFile) # Open netcdf4 file
+f = nc.Dataset(ncFile) # Open netcdf4 file
 
 if len(f.groups) == 0:
     print 'No Groups detected.'
@@ -193,11 +237,9 @@ if len(f.groups) == 0:
     for varNum in variables: # iterate through variables to clean up string
         varList.append(str(varNum))
 
-        # varList += "'" + str(varNum) + "',"
-
     varList.sort() # sort alphabetically
     groupDict = {}
-    groupDict['NoGroup'] = str(varList)
+    groupDict['NoGroup'] = varList
 else:
     print 'Groups detected.'
     groups = f.groups
@@ -216,9 +258,10 @@ else:
 pltType = definePlot()
 createLineSpace()
 
+print "Choose group(s) you want to grab data from."
+print "Pressing <Enter> inputs 'n' as a default   "
+    
 for gName in groupDict.keys():
-    # print "Choose group(s) you want to grab data from."
-    # print "Pressing <Enter> inputs 'n' as a default   "
     print gName + ": " + str(groupDict[gName]) + "\n"
 
 gLib = [s for s in groupDict.keys()]
@@ -226,57 +269,65 @@ gLib = [s for s in groupDict.keys()]
 gLibUse = getMultipleVariables(gLib)
 
 for groups in gLibUse:
-    gData = f.groups[groups]
-    groupDir = os.path.join(saveMainDir, groups)
-    
+    if groups == 'NoGroup':
+        gData = f
+        groupDir = saveMainDir
+    else:
+        gData = f.groups[groups]
+        groupDir = os.path.join(saveMainDir, groups)
     
     if pltType == 'timeseries':
         # Ask user for X axis (time)
         xVar = f.variables['time'] # create seperate time variable
-        xVarData = xVar[:]
-        
-        xVarData = netCDF4.num2date(xVarData, str(xVar.units)) # convert nc time to datetime
-        t0, t1 = minmax(xVarData) # get time min and max
+        xD = xVar[:]
+        xUnits = str(xVar.units)
+        xD = nc.num2date(xD, xUnits) # nc time to datetime
+        t0 = min(xD)
+        t1 = max(xD) # get time min and max
         record = np.array([[t0,t1]])
-#        xVarData = mDate.date2num(xVarData)
+
         #Ask user for Y axis (sensor)
-        print "********************************************************************"
-        print "Please choose sensor (y-axis) variable(s). (y/n)                    "
-        print "Pressing <Enter> inputs 'n' as a default                            "
-        print "********************************************************************"
-        yVarLib = [s for s in groupDict[groups] if not 'time' in s]
-        yVarUse = yVarLib
-#        yVarUse = getMultipleVariables(yVarLib)
+        print "****************************************************************"
+        print "Please choose sensor (y-axis) variable(s). (y/n)                "
+        print "Pressing <Enter> inputs 'n' as a default                        "
+        print "****************************************************************"
+        yVars = [s for s in groupDict[groups] if not 'time' in s]
         
         createLineSpace()
-#        keys = yVarDict.keys() # Get dictionary key names
-#        keys.sort()
         
-        for var in yVarUse: # iterate through y variable dictionary
-            yTuple = (var, gData.variables[var].units, var)#, float(gData[var].fill_value))
-            # name, unit, long name, fill
-            yVarData = gData.variables[var][:] # load variable data
-            seconds = (t1-t0).total_seconds()
+        for var in yVars: # iterate through y variable dictionary
+            print var
+            # print gData.variables
+            yD = gData.variables[var][:] # load variable data
             
-            if seconds < 3600*24: # less than a day
-                daily = returnTimeFrequencies(DAILY, t0, t1)
-                timeArray = np.concatenate((record,daily), axis=0)
-            elif (seconds >= 3600*24 and seconds < 3600*24*7):
-                daily = returnTimeFrequencies(DAILY, t0, t1)
-                timeArray = np.concatenate((record, daily), axis=0)
-            elif (seconds >= 3600*24*7 and seconds < 3600*24*7*4):
-                daily = returnTimeFrequencies(DAILY, t0, t1)
-                weekly = returnTimeFrequencies(WEEKLY, t0, t1)
-                timeArray = np.concatenate((record,daily, weekly), axis=0)
-            elif (seconds >= 3600*24*7*4):
-                daily = returnTimeFrequencies(DAILY, t0, t1)
-                weekly = returnTimeFrequencies(WEEKLY, t0, t1)
-                monthly = returnTimeFrequencies(MONTHLY, t0, t1)
-                timeArray = np.concatenate((record,daily,weekly,monthly), axis=0)    
-    
-            for times in timeArray:
-                xTemp, yTemp = returnDataBetweenTimes(xVarData, yVarData, times[0], times[1])
-                plotTimeSeries(xTemp, yTemp, yTuple, groupDir) 
+            if len(np.unique(yD)) == 1:
+                print "One value. Continuing"
+                continue
+            
+            if isinstance(yD[0], basestring): # check if array of strings
+                continue # skip if the array contains strings
+            else:
+                try:
+                    yU = str(gData.variables[var].units)
+                except AttributeError:
+                    yU = 'n/a'
+                    pass
+                yI = (var, yU, var) # name, unit, name
+                secs = (t1-t0).total_seconds()
+                yMa = np.ma.masked_outside(yD, yD.mean() - 50*yD.std(), yD.mean() + 50*yD.std())
+                yMin = np.min(yMa)
+                yMax = np.max(yMa)
+                yI = yI + (yMin,yMax,)
+
+                timeAry = buildTimes(t0, t1, secs)
+
+                for t in timeAry:
+                    xT, yT = subsampleData(xD, yD, t[0], t[1])
+                    
+                    if len(xT) == 0:
+                        continue
+                    else:
+                        plotTimeSeries(xT, yT, yI, groupDir)
 
 # elif pltType == 'profile':
 #     # print "******************************************************"
