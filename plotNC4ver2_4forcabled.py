@@ -77,11 +77,10 @@ def plotTimeSeries(x, y, yTuple, saveDir):
       
     fig,ax = plt.subplots()
     minorLocator = ticker.AutoMinorLocator()
-    
-    ax.plot_date(x, yMa, args.lineStyle, xdate=True, ydate=False, tz=pytz.utc)
-    # ax.plot_date(x, yMa, xdate=True, ydate=False, tz=pytz.utc,
-    # color='black', linestyle=args.lineStyle, linewidth=.5,
-    # marker='o', markersize=4, markerfacecolor='red', markeredgecolor='black')
+
+    ax.plot_date(x, yMa, xdate=True, ydate=False, tz=pytz.utc,
+    color='black', #linestyle='-', linewidth=.5,
+    marker='o', markersize=2, markerfacecolor='red', markeredgecolor='black')
     
     # Image size
     fig_size = plt.rcParams["figure.figsize"]
@@ -136,7 +135,7 @@ def plotTimeSeries(x, y, yTuple, saveDir):
         sDir = os.path.join(saveDir, saveFileName)
         
         
-    plt.savefig(str(sDir),dpi=int(args.res)) # save figure
+    plt.savefig(str(sDir),dpi=75) # save figure
     plt.close()
     
 def timeRecordIndicator(t0, t1):
@@ -215,8 +214,6 @@ def routine(ncFile):
     createLineSpace()
     # saveDir = os.getcwd()
     # PlotDir  = '/Users/michaesm/Documents/Plots/'
-    print args.saveDir
-    print fName
     saveMainDir = os.path.join(args.saveDir, fName)
 
     createDir(saveMainDir)
@@ -546,18 +543,6 @@ def main():
         action='store',
         help='Plot Type: Timeseries = ts, Profile = pr, or Line Chart = lc',
         dest='pltType')
-        
-    argParser.add_argument('-r', '--res',
-        action='store',
-        default=100,
-        help='Resolution in dots per inch. Default 100',
-        dest='res')
-    
-    argParser.add_argument('-tsM',
-        default='-ro',
-        action='store',
-        help='Control the line style or marker. Refer to http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot for accepted controls.',
-        dest='lineStyle')
     
     # argParser.add_argument('-')
     global args

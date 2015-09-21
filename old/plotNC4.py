@@ -10,7 +10,6 @@ import matplotlib.dates as mDate
 import matplotlib.ticker as ticker
 import pytz
 from dateutil.rrule import *
-import argparse
 '''
 This script is used to generates plots from any netcdf file containing a time 
 variable and containing other data.
@@ -37,9 +36,9 @@ def definePlot():
     pltType = raw_input("Enter plot type number (Enter <1>): ") or '1'
     return plotDict[pltType]
 
-# def getFileName(dirStr):
-#     dirStr = dirStr[dirStr.rfind('/')+1:dirStr.rfind('.')]
-#     return dirStr
+def getFileName(dirStr):
+    dirStr = dirStr[dirStr.rfind('/')+1:dirStr.rfind('.')]
+    return dirStr
 
 def getSingleVariable(library):
     if len(library) == 1:
@@ -77,11 +76,10 @@ def plotTimeSeries(x, y, yTuple, saveDir):
       
     fig,ax = plt.subplots()
     minorLocator = ticker.AutoMinorLocator()
-    
-    ax.plot_date(x, yMa, args.lineStyle, xdate=True, ydate=False, tz=pytz.utc)
-    # ax.plot_date(x, yMa, xdate=True, ydate=False, tz=pytz.utc,
-    # color='black', linestyle=args.lineStyle, linewidth=.5,
-    # marker='o', markersize=4, markerfacecolor='red', markeredgecolor='black')
+
+    ax.plot_date(x, yMa, xdate=True, ydate=False, tz=pytz.utc,
+    color='black', linestyle='-', linewidth=.5,
+    marker='o', markersize=4, markerfacecolor='red', markeredgecolor='black')
     
     # Image size
     fig_size = plt.rcParams["figure.figsize"]
@@ -125,7 +123,7 @@ def plotTimeSeries(x, y, yTuple, saveDir):
     fListing = 1
     tFormatDir = timeRecordIndicator(ts1, ts2)
     
-    if fListing == 1:
+    if fListing == 0:
         tempDir = os.path.join(saveDir, tFormatDir)
         createDir(tempDir)
         saveFileName = yTuple[0] + '-ts-' + tStr  
@@ -136,7 +134,7 @@ def plotTimeSeries(x, y, yTuple, saveDir):
         sDir = os.path.join(saveDir, saveFileName)
         
         
-    plt.savefig(str(sDir),dpi=int(args.res)) # save figure
+    plt.savefig(str(sDir),dpi=100) # save figure
     plt.close()
     
 def timeRecordIndicator(t0, t1):
@@ -205,19 +203,12 @@ def createDir(newDir):
             else:
                 raise
 
-def routine(ncFile):
+def main(ncFile):
+    fName = getFileName(ncFile)
     global fName
-    # fName = getFileName(ncFile)
-    print ncFile
-    head,tail = os.path.split(ncFile)
-    fName = tail.split('.',1)[0]
-    # fName = os.path.basename(ncFile)
     createLineSpace()
-    # saveDir = os.getcwd()
-    # PlotDir  = '/Users/michaesm/Documents/Plots/'
-    print args.saveDir
-    print fName
-    saveMainDir = os.path.join(args.saveDir, fName)
+    saveDir = os.getcwd()
+    saveMainDir = os.path.join(saveDir, fName)
 
     createDir(saveMainDir)
             
@@ -238,34 +229,20 @@ def routine(ncFile):
     else:
         print 'Groups detected.'
         groups = f.groups
-        # print groups
         groupDict = {}
-        groupLib = []        
-        # print 'Test detected.'
-        for test in groups:
-            #print test
-            #print 'printing gVars'
-            grpVars = f.groups[test].groups
-            #print grpVars                    
-            for grpNum in grpVars:
-                #print "Printing subgoup"
-                #print grpNum
-                gVars = f.groups[test].groups[grpNum].variables.keys()
-                # print "printing gVars"
-                # print gVars
-                varList = []
-                
-                for varNum in gVars:
-                    varList.append(str(varNum))
-            
+        groupLib = []
+        for group in groups:
+            print group
+            gVars = f.groups[group].variables.keys()
+            varList = []
+            for varNum in gVars:
+                varList.append(str(varNum))
             varList.sort()
-            groupDict[str(test)] = varList
-         		
-                
+            groupDict[str(group)] = varList
 
     # Prompt user for the type of plot they would like to create
     # pltType = definePlot()
-    # pltType = 'timeseries'
+    pltType = 'timeseries'
     createLineSpace()
 
     # print "Choose group(s) you want to grab data from."
@@ -278,56 +255,39 @@ def routine(ncFile):
     gLibUse = gLib
 
     # gLibUse = getMultipleVariables(gLib)
-    
-    # print "I am here"
-    
-    for dgroups in gLibUse:  	    
-        if dgroups == 'NoGroup':  	        
+
+    for groups in gLibUse:
+        if groups == 'NoGroup':
             gData = f
             groupDir = saveMainDir
-            # print "if groups == NoGroup"
-            # print dgroups
-        else: 
-            gData = f.groups[dgroups].groups['1']
-            # print gData
-            groupName = dgroups[0:23]
-            groupName = groupName.replace('|','_')                       
-            groupDir = os.path.join(saveMainDir, groupName)
-        if args.pltType == 'ts':
+        else:
+            gData = f.groups[groups]
+            groupDir = os.path.join(saveMainDir, groups)
+    
+        if pltType == 'timeseries':
             # Ask user for X axis (time)
-            xVar = f.variables['time'] # find whatever the time variable is
-            # print xxVar
-            # for time in xxVar:
-                   # xVar = f.variables['time'] # create seperate time variable
-                   # print xVar
+            xVar = f.variables['time'] # create seperate time variable
             xD = xVar[:]
-            #print len(xD)
-            print xVar
-            # xUnits = str(xVar.units)
-            xUnits = 'seconds since 1900-01-01'
+            xUnits = str(xVar.units)
             xD = nc.num2date(xD, xUnits) # nc time to datetime
             t0 = min(xD)
             t1 = max(xD) # get time min and max
-            global record
             record = np.array([[t0,t1]])
+            global record
 
             #Ask user for Y axis (sensor)
             # print "****************************************************************"
-            # print "Please choose sensor (y-axis) variable(s). (y/n)                "
-            # print "Pressing <Enter> inputs 'n' as a default                        "
-            # print "****************************************************************"
-            yVars = [s for s in groupDict[dgroups] if not 'time' in s]
-            yVars = [s for s in yVars if not 'date' in s]
-            yVars = [s for s in yVars if not 'provenance' in s]
-            
+#             print "Please choose sensor (y-axis) variable(s). (y/n)                "
+#             print "Pressing <Enter> inputs 'n' as a default                        "
+#             print "****************************************************************"
+            yVars = [s for s in groupDict[groups] if not 'time' in s]
+        
             createLineSpace()
         
             for var in yVars: # iterate through y variable dictionary
                 print var
                 # print gData.variables
                 yD = gData.variables[var][:] # load variable data
-                # print yD
-                # yD = yD.astype(npfloat)
             
                 if len(np.unique(yD)) == 1:
                     print "One value. Continuing"
@@ -335,8 +295,6 @@ def routine(ncFile):
             
                 if isinstance(yD[0], basestring): # check if array of strings
                     continue # skip if the array contains strings
-                elif yD[0].dtype == 'S1':
-                    continue
                 else:
                     try:
                         yU = str(gData.variables[var].units)
@@ -351,10 +309,9 @@ def routine(ncFile):
                     if len(yMa) == 0:
                         continue
                     yMin = np.nanmin(yMa)
-                    
                     yMax = np.nanmax(yMa)
-                    # print yMin
-                    # print yMax
+                    print yMin
+                    print yMax
                     
                     yI = yI + (yMin,yMax,)
 
@@ -521,53 +478,11 @@ def routine(ncFile):
     #
     #         plt.savefig(saveFile+'_'+yVarName+'_line',dpi=120) # save figure
     #         # mlab.pyplot.show()
+    #
+trgDir = '/Users/michaesm/Documents/repositories/uframe-webservices/'
 
-def main():
-    # script usage mssage
-    USAGE = """
-    netCDF Plotting Script.
-    
-    Use this script to recursively search a directory and plot variables for each netCDF file. This is a generic plotting routine that can plot time series, depth profiles, and x-y plots
-    """
-    argParser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter);
-    
-    # Add options:
-    argParser.add_argument('-d', '--dir',
-        action='store',
-        help='Directory of netcdf files',
-        dest='trgDir');
-    
-    argParser.add_argument('-s', '--sav',
-        action='store',
-        help='Directory to save plots',
-        dest='saveDir')
-    
-    argParser.add_argument('-p', '--type',
-        action='store',
-        help='Plot Type: Timeseries = ts, Profile = pr, or Line Chart = lc',
-        dest='pltType')
-        
-    argParser.add_argument('-r', '--res',
-        action='store',
-        default=100,
-        help='Resolution in dots per inch. Default 100',
-        dest='res')
-    
-    argParser.add_argument('-tsM',
-        default='-ro',
-        action='store',
-        help='Control the line style or marker. Refer to http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot for accepted controls.',
-        dest='lineStyle')
-    
-    # argParser.add_argument('-')
-    global args
-    args = argParser.parse_args();
-    
-    for root, dirs, files in os.walk(args.trgDir):
-        for file in files:
-            if file.endswith(".nc"):
-                ncFile = os.path.join(root,file)
-                routine(ncFile)
-            
-if __name__ == '__main__':
-    main()
+for root, dirs, files in os.walk(trgDir):
+    for file in files:
+        if file.endswith(".nc"):
+            ncFile = os.path.join(root,file)
+            main(ncFile)
