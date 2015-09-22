@@ -14,13 +14,13 @@ This script was created for the Ocean Observatories Initiative (OOI) data review
 ###Installation
     >git clone https://github.com/najascutellatus/plot-nc-ooi.git
 
-There's also a [pip_requirements.txt] containing the required packages.  To install these packages, use:
+There's also a [pip_requirements.txt] (https://github.com/najascutellatus/plot-nc-ooi/blob/master/pip_requirements.txt) containing the required packages.  To install these packages, use:
 
 > pip install -r pip_requirements.txt
 
 ###Scripts
 There is one main script:
-- [plotNC4.py](https://github.com/ooi-integration/uframe-webservices/blob/master/get_arrays.py): Plots a directory of netCDF4 files recursively.
+- [plotNC4.py](https://github.com/najascutellatus/plot-nc-ooi/blob/master/plotNC4.py): Plots a directory of netCDF4 files recursively.
 
 The default argument inputs are:
 - [--dir]: Current working directory
