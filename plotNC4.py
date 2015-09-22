@@ -37,10 +37,6 @@ def definePlot():
     pltType = raw_input("Enter plot type number (Enter <1>): ") or '1'
     return plotDict[pltType]
 
-# def getFileName(dirStr):
-#     dirStr = dirStr[dirStr.rfind('/')+1:dirStr.rfind('.')]
-#     return dirStr
-
 def getSingleVariable(library):
     if len(library) == 1:
         print "Only 1 variable present."
@@ -215,6 +211,8 @@ def routine(ncFile):
     createLineSpace()
     # saveDir = os.getcwd()
     # PlotDir  = '/Users/michaesm/Documents/Plots/'
+    
+    # if args.saveDir
     print args.saveDir
     print fName
     saveMainDir = os.path.join(args.saveDir, fName)
@@ -534,26 +532,29 @@ def main():
     # Add options:
     argParser.add_argument('-d', '--dir',
         action='store',
-        help='Directory of netcdf files',
+        default=os.getcwd(),
+        help='Directory of netcdf files. Defaults to current working directory.',
         dest='trgDir');
     
-    argParser.add_argument('-s', '--sav',
+    argParser.add_argument('-s', '--save',
         action='store',
-        help='Directory to save plots',
+        default=os.getcwd(),
+        help='Directory to save plots. Defaults to current working directory.',
         dest='saveDir')
     
-    argParser.add_argument('-p', '--type',
+    argParser.add_argument('-p', '--plotType',
         action='store',
+        default = 'ts',
         help='Plot Type: Timeseries = ts, Profile = pr, or Line Chart = lc',
         dest='pltType')
         
-    argParser.add_argument('-r', '--res',
+    argParser.add_argument('-r', '--resolution',
         action='store',
         default=100,
         help='Resolution in dots per inch. Default 100',
         dest='res')
     
-    argParser.add_argument('-tsM',
+    argParser.add_argument('-tsM', '--linestyle',
         default='-ro',
         action='store',
         help='Control the line style or marker. Refer to http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot for accepted controls.',
@@ -562,6 +563,9 @@ def main():
     # argParser.add_argument('-')
     global args
     args = argParser.parse_args();
+    
+    print "Directory of netCDF4 files: " + args.trgDir
+    print "Directory to save plots:" + args.saveDir
     
     for root, dirs, files in os.walk(args.trgDir):
         for file in files:
