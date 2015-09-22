@@ -23,11 +23,11 @@ There is one main script:
 - [plotNC4.py](https://github.com/ooi-integration/uframe-webservices/blob/master/get_arrays.py): Plots a directory of netCDF4 files recursively.
 
 The default argument inputs are:
--[--dir]: Current working directory
--[--sav]: Current working directory
--[--type]: ts (Timeseries plot)
--[--res]: 100 (100 dpi)
--[--linestyle]: '-ro' (Black line connected by red circles)
+- [--dir]: Current working directory
+- [--sav]: Current working directory
+- [--type]: ts (Timeseries plot)
+- [--res]: 100 (100 dpi)
+- [--linestyle]: '-ro' (Black line connected by red circles)
 
 ###Examples
 
