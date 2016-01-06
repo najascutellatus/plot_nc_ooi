@@ -106,8 +106,10 @@ def plot_cross_section(x, y, z, args):
     plt.close()
 
 def reject_outliers(data, m=3):
+    # function to reject outliers beyond 3 standard deviations of the mean.
+    # data: numpy array containing data
+    # m: the number of standard deviations from the mean. Default: 3
     return abs(data - np.mean(data)) < m * np.std(data)
-
 
 
 url_ctd='http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/eov-3/Coastal_Endurance/CE04OSPS/2A-CTDPFA107/streamed/CE04OSPS-SF01B-2A-CTDPFA107-ctdpf_sbe43_sample-streamed/CE04OSPS-SF01B-2A-CTDPFA107-ctdpf_sbe43_sample-streamed.ncml'
@@ -116,7 +118,6 @@ url_nutnr='http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/eov-3/Coastal
 
 start_time = datetime.datetime(2015, 10, 18, 0, 0, 0)
 end_time = datetime.datetime(2015, 10, 25, 0, 0, 0)
-
 
 # load CTD dataset
 ctd = nc.Dataset(url_ctd)
