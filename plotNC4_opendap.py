@@ -3,9 +3,9 @@
 import os,sys,time
 import netCDF4 as nc
 import numpy as np
-import pylab
+# import pylab
 from datetime import datetime, timedelta
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import matplotlib.dates as mDate
 import matplotlib.ticker as ticker
 import pytz
@@ -15,6 +15,8 @@ from xml.dom import minidom
 import os
 import urllib2
 import re
+import pickle
+
 '''
 This script is used to generates plots from any netcdf file containing a time 
 variable and containing other data.
@@ -104,11 +106,68 @@ def getMultipleVariables(library):
             multiVarLib.append(variable)
     return multiVarLib
 
-def plotProfiles(x, y, yTuple, saveDir):
-    ## function to create time series plot
-    ## x: profiled variable, y: pressure or depth
-    ## yTuple: ('variable name', 'units'), saveDir
+# def plotProfiles(x, y, yTuple, saveDir):
+#     ## function to create time series plot
+#     ## x: profiled variable, y: pressure or depth
+#     ## yTuple: ('variable name', 'units'), saveDir
+#
+#     ymin = np.nanmin(y)
+#     ymax = np.nanmax(y)
+#     nMa = np.ma.count_masked(y)
+#
+#     fig,ax = plt.subplots()
+#     minorLocator = ticker.AutoMinorLocator()
+#
+#     ax.plot(x, y, args.lineStyle)
+#
+#     # Image size
+#     fig_size = plt.rcParams["figure.figsize"]
+#     fig_size[0] = 12
+#     fig_size[1] = 8.5
+#     plt.rcParams["figure.figsize"] = fig_size
+#
+#     # setup axes
+#     if args.lock: # lock y-limits axes across time period
+#         plt.ylim((yTuple[3], yTuple[4]))
+#     ax.xaxis.set_minor_locator(minorLocator)
+#     xax = ax.get_xaxis().get_major_formatter()
+#
+#     y_formatter = ticker.ScalarFormatter(useOffset=False)
+#     ax.yaxis.set_major_formatter(y_formatter)
+#     plt.grid()
+#
+#     # setup labels and title
+#     # ts1 = min(x); ts2 = max(x)
+#     # ts1 = mDate.num2date(ts1); ts2 = mDate.num2date(ts2)
+#     # tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S')
+#     # tStrTitle = ts1.strftime('%Y-%m-%d %H:%M:%S') + ' to ' + ts2.strftime('%Y-%m-%d %H:%M:%S')
+#     # ax.legend(["Maximum: %f" % ymax + "\nMinimum: %f" % ymin + "\nMasked: %f" % nMa], loc='best')
+#     ax.set_xlabel('Time (UTC)') # x label
+#     ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
+#     ax.set_title(fName + '\n' + tStrTitle) # title
+#
+#     fListing = 0
+#     tFormatDir = timeRecordIndicator(ts1, ts2)
+#
+#     if fListing == 1:
+#         tempDir = os.path.join(saveDir, tFormatDir)
+#         createDir(tempDir)
+#         saveFileName = yTuple[0] + '-ts-' + tStr
+#         sDir = os.path.join(tempDir, saveFileName)
+#     else:
+#         createDir(saveDir)
+#         saveFileName = yTuple[0] + '-ts-' + tFormatDir + '-' + tStr
+#         sDir = os.path.join(saveDir, saveFileName)
+#
+#
+#     plt.savefig(str(sDir),dpi=int(args.res)) # save figure
+#     plt.close()
 
+def plotTimeSeries(x, y, yTuple, saveDir):
+    ## function to create time series plot
+    ## x: array of datetimes, y: data to plot
+    ## yTuple: ('variable name', 'units'), saveDir
+    x = mDate.date2num(x) # convert datetime to matplotlib time
     ymin = np.nanmin(y)
     ymax = np.nanmax(y)
     nMa = np.ma.count_masked(y)
@@ -116,7 +175,7 @@ def plotProfiles(x, y, yTuple, saveDir):
     fig,ax = plt.subplots()
     minorLocator = ticker.AutoMinorLocator()
 
-    ax.plot(x, y, args.lineStyle)
+    ax.plot_date(x, y, args.lineStyle, xdate=True, ydate=False, tz=pytz.utc)
 
     # Image size
     fig_size = plt.rcParams["figure.figsize"]
@@ -130,16 +189,24 @@ def plotProfiles(x, y, yTuple, saveDir):
     ax.xaxis.set_minor_locator(minorLocator)
     xax = ax.get_xaxis().get_major_formatter()
 
+    xax.scaled = {
+        365.0 : '%Y-%M', # data longer than a year
+        30.   : '%Y-%m\n%d', # set the > 1m < 1Y scale to Y-m
+        1.0   : '%b-%d\n%H:%M', # set the > 1d < 1m scale to Y-m-d
+        1./24.: '%b-%d\n%H:%M', # set the < 1d scale to H:M
+        1./48.: '%b-%d\n%H:%M:%S',
+    }
+
     y_formatter = ticker.ScalarFormatter(useOffset=False)
     ax.yaxis.set_major_formatter(y_formatter)
     plt.grid()
 
     # setup labels and title
-    # ts1 = min(x); ts2 = max(x)
-    # ts1 = mDate.num2date(ts1); ts2 = mDate.num2date(ts2)
-    # tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S')
-    # tStrTitle = ts1.strftime('%Y-%m-%d %H:%M:%S') + ' to ' + ts2.strftime('%Y-%m-%d %H:%M:%S')
-    # ax.legend(["Maximum: %f" % ymax + "\nMinimum: %f" % ymin + "\nMasked: %f" % nMa], loc='best')
+    ts1 = min(x); ts2 = max(x)
+    ts1 = mDate.num2date(ts1); ts2 = mDate.num2date(ts2)
+    tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S')
+    tStrTitle = ts1.strftime('%Y-%m-%d %H:%M:%S') + ' to ' + ts2.strftime('%Y-%m-%d %H:%M:%S')
+    ax.legend(["Maximum: %f" % ymax + "\nMinimum: %f" % ymin + "\nMasked: %f" % nMa], loc='best')
     ax.set_xlabel('Time (UTC)') # x label
     ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
     ax.set_title(fName + '\n' + tStrTitle) # title
@@ -158,74 +225,6 @@ def plotProfiles(x, y, yTuple, saveDir):
         sDir = os.path.join(saveDir, saveFileName)
 
 
-    plt.savefig(str(sDir),dpi=int(args.res)) # save figure
-    plt.close()
-
-def plotTimeSeries(x, y, yTuple, saveDir):
-    ## function to create time series plot
-    ## x: array of datetimes, y: data to plot
-    ## yTuple: ('variable name', 'units'), saveDir
-    x = mDate.date2num(x) # convert datetime to matplotlib time
-    # yMa = np.ma.masked_outside(y, y.mean() - 50*y.std(), y.mean() + 50*y.std())
-    # yMa = np.ma.masked_where(y==-9999999, y)
-    # yMa = y
-    ymin = np.nanmin(y)
-    ymax = np.nanmax(y)
-    nMa = np.ma.count_masked(y)
-      
-    fig,ax = plt.subplots()
-    minorLocator = ticker.AutoMinorLocator()
-    
-    ax.plot_date(x, y, args.lineStyle, xdate=True, ydate=False, tz=pytz.utc)
-
-    # Image size
-    fig_size = plt.rcParams["figure.figsize"]
-    fig_size[0] = 12
-    fig_size[1] = 8.5
-    plt.rcParams["figure.figsize"] = fig_size
-    
-    # setup axes
-    if args.lock: # lock y-limits axes across time period
-        plt.ylim((yTuple[3], yTuple[4]))
-    ax.xaxis.set_minor_locator(minorLocator)
-    xax = ax.get_xaxis().get_major_formatter()
-
-    xax.scaled = {
-        365.0 : '%Y-M', # data longer than a year
-        30.   : '%Y-m\n%d', # set the > 1m < 1Y scale to Y-m
-        1.0   : '%b-%d\n%H:%M', # set the > 1d < 1m scale to Y-m-d
-        1./24.: '%b-%d\n%H:%M', # set the < 1d scale to H:M
-        1./48.: '%b-%d\n%H:%M:%S',
-    }
-    
-    y_formatter = ticker.ScalarFormatter(useOffset=False)
-    ax.yaxis.set_major_formatter(y_formatter)
-    plt.grid()
-    
-    # setup labels and title
-    ts1 = min(x); ts2 = max(x)
-    ts1 = mDate.num2date(ts1); ts2 = mDate.num2date(ts2)
-    tStr = ts1.strftime('%Y-%m-%dT%H%M%S') + '_' + ts2.strftime('%Y-%m-%dT%H%M%S')
-    tStrTitle = ts1.strftime('%Y-%m-%d %H:%M:%S') + ' to ' + ts2.strftime('%Y-%m-%d %H:%M:%S')
-    ax.legend(["Maximum: %f" % ymax + "\nMinimum: %f" % ymin + "\nMasked: %f" % nMa], loc='best')
-    ax.set_xlabel('Time (UTC)') # x label
-    ax.set_ylabel(str(yTuple[0]) + ' (' + yTuple[1] + ')') # y label
-    ax.set_title(fName + '\n' + tStrTitle) # title
-        
-    fListing = 0
-    tFormatDir = timeRecordIndicator(ts1, ts2)
-    
-    if fListing == 1:
-        tempDir = os.path.join(saveDir, tFormatDir)
-        createDir(tempDir)
-        saveFileName = yTuple[0] + '-ts-' + tStr  
-        sDir = os.path.join(tempDir, saveFileName)
-    else:
-        createDir(saveDir)
-        saveFileName = yTuple[0] + '-ts-' + tFormatDir + '-' + tStr  
-        sDir = os.path.join(saveDir, saveFileName)
-        
-        
     plt.savefig(str(sDir),dpi=int(args.res)) # save figure
     plt.close()
     
@@ -317,14 +316,17 @@ def routine(ncFile):
         
     if len(f.groups) == 0:
         print 'No Groups detected.'
-        variables = f.variables.keys() # Get list if variables
-    
-        # create dict of group
-        varList = []
-        for varNum in variables: # iterate through variables to clean up string
-            varList.append(str(varNum))
+        # variables = f.variables.keys() # Get list if variables
+        #
+        # # create dict of group
+        # varList = []
+        # for varNum in variables: # iterate through variables to clean up string
+        #     varList.append(str(varNum))
 
+        varList = []
+        varList = varDict[f.stream] # Get variables we DONT want to look at from pickle file dictionary
         varList.sort() # sort alphabetically
+
         groupDict = {}
         groupDict['NoGroup'] = varList
     else:
@@ -350,9 +352,8 @@ def routine(ncFile):
 
     createLineSpace()
 
-    
-    for gName in groupDict.keys():
-        print gName + ": " + str(groupDict[gName]) + "\n"
+    # for gName in groupDict.keys():
+    #     print gName + ": " + str(groupDict[gName]) + "\n"
 
     gLib = [s for s in groupDict.keys()]
     gLibUse = gLib
@@ -371,9 +372,12 @@ def routine(ncFile):
         if args.pltType == 'ts':
             # Ask user for X axis (time)
             xVar = f.variables['time'] # find whatever the time variable is
-            xD = xVar[:]
+            try:
+                xD = xVar[:]
+            except:
+                continue
             #print len(xD)
-            print xVar
+            # print xVar
             xUnits = str(xVar.units)
             xD = nc.num2date(xD, xUnits) # nc time to datetime
             t0 = min(xD)
@@ -381,30 +385,29 @@ def routine(ncFile):
             global record
             record = np.array([[t0,t1]])
 
-            datastrs = ['time', 'date', 'provenance', 'counts', 'volts', 'qc', 'deployment', 'timestamp','id',
-                        '_qc_executed', '_qc_results']
-            reV = re.compile('|'.join(datastrs))
+            reg_ex = re.compile('|'.join(groupDict[dgroups]))
+            yVars = [s for s in f.variables.keys() if not reg_ex.search(s)]
 
-            yVars = [s for s in groupDict[dgroups] if not 'time' in s]
-            for y in yVars:
-                print y
-            print 'Original Vars'
-            yVars = [s for s in yVars if not reV.search(s)]
-            for y in yVars:
-                print y
-            print 'Plotted Vars'
-            
+            reg_ex = re.compile('|'.join(['provenance', 'qc', 'id', 'obs', 'deployment', 'volts', 'counts']))
+
+            yVars = [s for s in yVars if not reg_ex.search(s)]
+            # yVars = [s for s in groupDict[dgroups] if not 'time' in s]
+
+            print 'Plotting Vars:'
+            print yVars
+
             createLineSpace()
         
             for var in yVars: # iterate through y variable dictionary
-                print var
-                # print gData.variables
-                yD = gData.variables[var][:] # load variable data
-                # print yD
-
-                if len(np.unique(yD)) == 1:
-                    print "One value. Continuing"
+                # print var
+                try:
+                    yD = gData.variables[var][:] # load variable data
+                except:
                     continue
+
+                # if len(np.unique(yD)) == 1:
+                #     print "One value. Continuing"
+                #     continue
             
                 if isinstance(yD[0], basestring): # check if array of strings
                     continue # skip if the array contains strings
@@ -424,8 +427,6 @@ def routine(ncFile):
                     if len(yMa) == 0:
                         continue
                     yMin = np.nanmin(yMa); yMax = np.nanmax(yMa)
-                    # print yMin
-                    # print yMax
                     
                     yI = yI + (yMin,yMax,)
 
@@ -445,7 +446,7 @@ def routine(ncFile):
                             plotTimeSeries(xT, yT, yI, groupDir)
 
 def main():
-    # script usage mssage
+    # script usage message
     USAGE = """
     netCDF Plotting Script.
     
@@ -454,12 +455,6 @@ def main():
     argParser = argparse.ArgumentParser(description=USAGE, formatter_class=argparse.RawDescriptionHelpFormatter)
     
     # Add options:
-    argParser.add_argument('-u', '--url',
-        action='store',
-        default='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/timeseries/catalog.html',
-        help='Opendap server url of netcdf files. Defaults to http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/timeseries/catalog.html.',
-        dest='url')
-    
     argParser.add_argument('-s', '--save',
         action='store',
         default=os.getcwd(),
@@ -483,6 +478,7 @@ def main():
         action='store',
         help='Control the line style or marker. Refer to http://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes.plot for accepted controls.',
         dest='lineStyle')
+
     argParser.add_argument('-la', '--lockaxes',
         action='store',
         default=True,
@@ -492,16 +488,43 @@ def main():
     global args
     args = argParser.parse_args()
     
-    print "Opendap url for netCDF4 files: " + args.url
+    # print "Opendap url for netCDF4 files: " + args.url
     print "Directory to save plots:" + args.saveDir
 
-    url='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/production/catalog.xml'
-    # url='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/timeseries/catalog.xml'
+    url='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/ufs-west/catalog.xml'
     opendap = 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/'
+    pkl_url = 'https://raw.githubusercontent.com/ooi-data-review/ooi-parameters-dict/master/ooi_nonscience_parameters.pkl'
+
     assert isinstance(url, object)
     arrayOOI = iterate_items(url)
     ncmlList = []
-    sI = raw_input("Enter list of sensors (comma-separated, all caps): ")
+
+    print "Sensors: Codes"
+    print "----------------------------------------"
+    print "Conductivity, Temperature, Density: CTD"
+    print "Dissolved Oxygen: DO"
+    print "Fluorometry (chl-a,cdom,backscatter): FLOR"
+    print "Photosynthetically Active Radiation: PAR"
+    print "Nitrate: NUTNR"
+    print "Meteorological Data: METBK"
+    print "----------------------------------------"
+    # print "Acoustic Doppler current profiler: ADCP"
+    # print "HYD"
+    # print "OPTAA"
+    # print "RASFL"
+    # print "PCO2"
+    # print "PH"
+    # print "PRESF"
+    # print "SPKIR"
+    # print "VEL3D"
+    # print "VELPT"
+    # print "WAVSS"
+    # print "ZPLSC"
+    # print "FDCHP"
+    # print "FLCDR"
+    # print "FLNTU"
+
+    sI = raw_input("Enter list of sensors codes (comma-separated, all caps): ")
     sI = sI.split(',')
     reX = re.compile('|'.join(sI))
     selectedArrays = getMultipleVariables(arrayOOI)
@@ -510,14 +533,13 @@ def main():
     print ' '
     print ' '
 
-    # ncmlList = [
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/02-DOFSTK000/telemetered/CP02PMUO-WFP01-02-DOFSTK000-dofst_k_wfp_instrument-telemetered/CP02PMUO-WFP01-02-DOFSTK000-dofst_k_wfp_instrument-telemetered.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/03-CTDPFK000/recovered_wfp/CP02PMUO-WFP01-03-CTDPFK000-ctdpf_ckl_wfp_instrument_recovered-recovered_wfp/CP02PMUO-WFP01-03-CTDPFK000-ctdpf_ckl_wfp_instrument_recovered-recovered_wfp.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/03-CTDPFK000/telemetered/CP02PMUO-WFP01-03-CTDPFK000-ctdpf_ckl_wfp_instrument-telemetered/CP02PMUO-WFP01-03-CTDPFK000-ctdpf_ckl_wfp_instrument-telemetered.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/04-FLORTK000/recovered_wfp/CP02PMUO-WFP01-04-FLORTK000-flort_kn_stc_imodem_instrument_recovered-recovered_wfp/CP02PMUO-WFP01-04-FLORTK000-flort_kn_stc_imodem_instrument_recovered-recovered_wfp.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/04-FLORTK000/telemetered/CP02PMUO-WFP01-04-FLORTK000-flort_kn_stc_imodem_instrument-telemetered/CP02PMUO-WFP01-04-FLORTK000-flort_kn_stc_imodem_instrument-telemetered.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/05-PARADK000/recovered_wfp/CP02PMUO-WFP01-05-PARADK000-parad_k__stc_imodem_instrument_recovered-recovered_wfp/CP02PMUO-WFP01-05-PARADK000-parad_k__stc_imodem_instrument_recovered-recovered_wfp.ncml',
-    # 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/production/Coastal_Pioneer/CP02PMUO/05-PARADK000/telemetered/CP02PMUO-WFP01-05-PARADK000-parad_k__stc_imodem_instrument-telemetered/CP02PMUO-WFP01-05-PARADK000-parad_k__stc_imodem_instrument-telemetered.ncml']
+    # load pickle file. This contains a python dictionary containing streams and relevant science variables
+    pkl_file = urllib2.urlopen(pkl_url)
+    # file = open(pkl_file, 'rb')
+    global varDict
+    varDict = pickle.load(pkl_file)
+    pkl_file.close()
+    # file.close()
 
     for urls in selectedArrays:
         platformOOI = iterate_items(urls)
@@ -536,27 +558,12 @@ def main():
                         ncml = [s for s in dataset if '.ncml' in s]
                         ncmlList.append(opendap + ncml[0])
 
-
-    # for urls in arrayOOI:
-    #     platformOOI = iterate_items(urls)
-    #     for platforms in platformOOI:
-    #         instrumentOOI = iterate_items(platforms)
-    #         for instruments in instrumentOOI:
-    #             deliveryMTD = iterate_items(instruments)
-    #             for methods in deliveryMTD:
-    #                 streams = iterate_items(methods)
-    #                 for stream in streams:
-    #                     (root, ext) = os.path.splitext(stream)
-    #                     streamURL = root + '.html'
-    #                     dataset = iterate_data(stream)
-    #                     ncml = [s for s in dataset if '.ncml' in s]
-    #                     ncmlList.append(opendap + ncml[0])
-
     for ncmls in ncmlList:
         if not 'metadata' in ncmls:
             if not 'calibration' in ncmls:
-                print ncmls
-                routine(ncmls)
+                if not 'eng' in ncmls:
+                    print ncmls
+                    routine(ncmls)
             
 if __name__ == '__main__':
     main()
