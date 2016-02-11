@@ -352,9 +352,6 @@ def routine(ncFile):
 
     createLineSpace()
 
-    # for gName in groupDict.keys():
-    #     print gName + ": " + str(groupDict[gName]) + "\n"
-
     gLib = [s for s in groupDict.keys()]
     gLibUse = gLib
 
