@@ -316,12 +316,6 @@ def routine(ncFile):
         
     if len(f.groups) == 0:
         print 'No Groups detected.'
-        # variables = f.variables.keys() # Get list if variables
-        #
-        # # create dict of group
-        # varList = []
-        # for varNum in variables: # iterate through variables to clean up string
-        #     varList.append(str(varNum))
 
         varList = []
         varList = varDict[f.stream] # Get variables we DONT want to look at from pickle file dictionary
