@@ -451,7 +451,13 @@ def main():
         default=os.getcwd(),
         help='Directory to save plots. Defaults to current working directory.',
         dest='saveDir')
-    
+
+    argParser.add_argument('-u', '--url',
+        action = 'store',
+        default = 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/ooiufs01/catalog.xml',
+        help = 'TDS catalog - must end in .xml. Defaults to http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/ooiufs01/catalog.xml',
+        dest = 'url')
+
     argParser.add_argument('-p', '--plotType',
         action='store',
         default = 'ts',
@@ -475,17 +481,21 @@ def main():
         default=True,
         dest='lock',
         help='Make the y-axes equal for single variables over an extended period of time')
+
+
     # argParser.add_argument('-')
     global args
     args = argParser.parse_args()
     
     # print "Opendap url for netCDF4 files: " + args.url
     print "Directory to save plots:" + args.saveDir
+    print args.url
 
-    url='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/ufs-west/catalog.xml'
+    #url='http://opendap-devel.ooi.rutgers.edu:8090/thredds/catalog/ooiufs01/catalog.xml'
     opendap = 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/'
     pkl_url = 'https://raw.githubusercontent.com/ooi-data-review/ooi-parameters-dict/master/ooi_nonscience_parameters.pkl'
 
+    url = args.url
     assert isinstance(url, object)
     arrayOOI = iterate_items(url)
     ncmlList = []
