@@ -1,6 +1,0 @@
-matplotlib==1.4.3
-netCDF4==1.1.9
-numpy==1.9.3
-pylab==0.1.3
-pytz==2015.6
-scipy==0.16.1
