@@ -12,6 +12,18 @@ from dateutil.rrule import *
 from dateutil.relativedelta import relativedelta
 
 
+def create_dir(new_dir):
+    # Check if dir exists.. if it doesn't... create it.
+    if not os.path.isdir(new_dir):
+        try:
+            os.makedirs(new_dir)
+        except OSError:
+            if os.path.exists(new_dir):
+                pass
+            else:
+                raise
+
+
 def auto_plot(x, y, title, stdev=3, line_style='r-o'):
     y_shape = y['data'].shape
 

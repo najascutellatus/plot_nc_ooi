@@ -24,6 +24,7 @@ def mk_str(attrs, str_type='t'):
         string = site + '-' + node + ' Stream: ' + stream + '\n' + 'Variable: '
     return string
 
+
 def read_file(fname):
     file_list = []
     with open(fname) as f:
@@ -34,6 +35,7 @@ def read_file(fname):
                 continue
     return file_list
 
+
 @click.command()
 @click.argument('files', nargs=1, type=click.Path())
 @click.argument('out', nargs=1, type=click.Path(exists=False))
@@ -43,7 +45,9 @@ def main(files, out):
     out: Directory to save plots
     """
     fname, ext = os.path.splitext(files)
-    if ext in '.nc' or '.ncml':
+    if ext in '.nc':
+        list_files = [files]
+    elif ext in '.ncml':
         list_files = [files]
     else:
         list_files = read_file(files)
@@ -56,6 +60,8 @@ def main(files, out):
             stream = ds_disk.stream  # List stream name associated with the data
             title_pre = mk_str(ds_disk.attrs, 't')  # , var, tt0, tt1, 't')
             save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
+            save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream)
+            pf.create_dir(save_dir)
 
             stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
             eng = stream_vars[stream]  # select specific streams engineering variables
@@ -63,8 +69,13 @@ def main(files, out):
                     'volts', 'counts']
 
             reg_ex = re.compile('|'.join(eng + misc))  # make regular expression
+
             #  keep variables that are not in the regular expression
             sci_vars = [s for s in ds_variables if not reg_ex.search(s)]
+
+            if ds_disk.subsite[-4:] is not 'MOAS': # don't plot lat/lon for moorings
+                reg_ll = re.compile('|'.join(['lon', 'lat']))
+                sci_vars = [s for s in sci_vars if not reg_ll.search(s)]
 
             t0, t1 = pf.get_rounded_start_and_end_times(ds_disk['time'].data)
             tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
@@ -103,11 +114,11 @@ def main(files, out):
                     title = title_pre + var + '\n' + tt0.strftime(fmt) + ' - ' + tt1.strftime(fmt)
                     fig, ax = pf.auto_plot(x, y, title, stdev=3, line_style='r-o')
                     pf.resize(width=12, height=8.5)  # Resize figure
-                    pf.save_fig(out, sname, res=150)  # Save figure
+                    pf.save_fig(save_dir, sname, res=150)  # Save figure
                     plt.close('all')
                     del x, y
                 del sub_ds
 
 if __name__ == '__main__':
-    # main('http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/04-DOSTAD000/recovered_host/CE09OSSM-RID27-04-DOSTAD000-dosta_abcdjm_dcl_instrument_recovered-recovered_host/CE09OSSM-RID27-04-DOSTAD000-dosta_abcdjm_dcl_instrument_recovered-recovered_host.ncml', '/Users/michaesm/Documents/')
+    # main('/Users/michaesm/Documents/dev/repos/ooi-tools/plot-nc-ooi/thredds-links.txt', '/Users/michaesm/Documents/')
     main()

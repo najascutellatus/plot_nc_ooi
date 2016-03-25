@@ -12,29 +12,26 @@ This script was created for the Ocean Observatories Initiative (OOI) data review
 
 
 ###Installation
-    >git clone https://github.com/najascutellatus/plot-nc-ooi.git
+    >git clone hhttps://github.com/ooi-data-review/plot-nc-ooi.git
 
-There's also a [pip_requirements.txt] (https://github.com/najascutellatus/plot-nc-ooi/blob/master/pip_requirements.txt) containing the required packages.  To install these packages, use:
+There's also a [requirements.txt] (https://github.com/ooi-data-review/plot-nc-ooi/blob/master/requirements.txt) containing the required packages.  To install these packages, use:
 
-> pip install -r pip_requirements.txt
+> pip install -r requirements.txt
 
 ###Scripts
 There is one main script:
-- [plotNC4.py](https://github.com/najascutellatus/plot-nc-ooi/blob/master/plotNC4.py): Plots a directory of netCDF4 files recursively.
+- [plot_timeseries.py](https://github.com/ooi-data-review/plot-nc-ooi/blob/master/plot_timeseries.py): Plots a directory of netCDF4 files recursively.
 
 The default argument inputs are:
-- [--dir]: Current working directory
-- [--sav]: Current working directory
-- [--type]: ts (Timeseries plot)
-- [--res]: 100 (100 dpi)
-- [--linestyle]: '-ro' (Black line connected by red circles)
+- [FILES]: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
+- [OUT]: Directory to save plots
 
 ###Examples
 
-plotNC4 Help Documentation:
+plot_timeseries Help Documentation:
 
-> plotNC4.py -h
+> python -m plot_timeseries --help
 
 To make a time series plot of a netCDF4 file,
 
-> plotNC4.py -d /Users/michaesm/OOI/netcdf/ -s /Users/michaesm/OOI/plots/ -p ts 
+> python -m plot_timeseries ./thredds-links.txt ./plots
