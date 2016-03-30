@@ -52,7 +52,9 @@ def main(files, out):
     else:
         list_files = read_file(files)
 
+    stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
     for nc in list_files:
+        print nc
         with xr.open_dataset(nc) as ds_disk:
             # change dimensions from 'obs' to 'time'
             ds_disk = ds_disk.swap_dims({'obs': 'time'})
@@ -62,9 +64,11 @@ def main(files, out):
             save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
             save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream)
             pf.create_dir(save_dir)
+            try:
+                eng = stream_vars[stream]  # select specific streams engineering variables
+            except KeyError:
+                eng = ['']
 
-            stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
-            eng = stream_vars[stream]  # select specific streams engineering variables
             misc = ['timestamp', 'provenance', 'qc', 'id', 'obs', 'deployment',
                     'volts', 'counts']
 
@@ -88,28 +92,19 @@ def main(files, out):
 
                 for var in sci_vars:
                     try:
-                        print var
+                        # print var
                         sci = sub_ds[var]
                     except UnicodeEncodeError: # some comments have latex characters
                         sub_ds[var].attrs.pop('comment')  # remove from the attributes
                         sci = sub_ds[var]  # or else the variable won't load
 
-                    x = {'data': sub_ds['time'].data,
-                         'info':
-                             {'label': sub_ds['time'].standard_name,
-                              'units': 'GMT'}
-                         }
-
+                    x = dict(data=sub_ds['time'].data, info=dict(label=sub_ds['time'].standard_name, units='GMT'))
                     try:
                         y_lab = sci.long_name
-                    except:
+                    except AttributeError:
                         y_lab = sci.standard_name
+                    y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
-                    y = {'data': sci.data,
-                         'info':
-                             {'label': y_lab,
-                              'units': sci.units}
-                         }
                     sname = save_pre + var + '-' + tt0.strftime(fmt) + '-' + tt1.strftime(fmt)
                     title = title_pre + var + '\n' + tt0.strftime(fmt) + ' - ' + tt1.strftime(fmt)
                     fig, ax = pf.auto_plot(x, y, title, stdev=3, line_style='r-o')
@@ -120,5 +115,5 @@ def main(files, out):
                 del sub_ds
 
 if __name__ == '__main__':
-    # main('/Users/michaesm/Documents/dev/repos/ooi-tools/plot-nc-ooi/thredds-links.txt', '/Users/michaesm/Documents/')
+    # main('/Users/michaesm/Documents/dev/repos/ooi-data-review/plot-nc-ooi/thredds-links/2016.03.28T11.03.00-nc-links.txt', '/Users/michaesm/Documents/')
     main()

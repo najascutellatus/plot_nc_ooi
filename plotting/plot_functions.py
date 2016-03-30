@@ -11,6 +11,13 @@ import pandas as pd
 from dateutil.rrule import *
 from dateutil.relativedelta import relativedelta
 
+S = """
+    Reject outliers standard deviations of the mean.
+    :param data: Numpy array containing data
+    :param m: Number of standard deviations from the mean. Default: 3
+    :return: Index of the outliers contained in the numpy arrayxccxcc
+    """
+
 
 def create_dir(new_dir):
     # Check if dir exists.. if it doesn't... create it.
@@ -173,11 +180,17 @@ def plot(x, y, title, stdev = None, line_style='r-o'):
     return fig, ax
 
 
-def pcolor(x, y, z):
+def adcp(time, bins, north, east, up, title):
     fig, ax = plt.subplots()
-    pc = ax.pcolor(x, y, z)
-    plt.colorbar(pc)
-    return fig, ax
+    pc1 = ax.pcolor(time['data'], bins['data'], north['data'])
+    plt.colorbar(pc1)
+    # pc2 = ax2.pcolor(time['data'], bins['data'], east['data'])
+    # plt.colorbar(pc2)
+    # pc3 = ax3.pcolor(time['data'], bins['data'], up['data'])
+    # plt.colorbar(pc3)
+    # pc = ax.pcolor(x, y, z)
+    # plt.colorbar(pc)
+    return fig, ax1
 
 
 def nan_plot(title):
@@ -195,16 +208,10 @@ def nan_plot(title):
 
 
 def reject_outliers(data, m=3):
-    """
-    Reject outliers standard deviations of the mean.
-    :param data: Numpy array containing data
-    :param m: Number of standard deviations from the mean. Default: 3
-    :return: Index of the outliers contained in the numpy array
-    """
     # function to reject outliers beyond 3 standard deviations of the mean.
     # data: numpy array containing data
     # m: the number of standard deviations from the mean. Default: 3
-    return abs(data - np.mean(data)) < m * np.std(data)
+    return abs(data - np.nanmean(data)) < m * np.nanstd(data)
 
 
 def resize(width=12, height=8.5):
