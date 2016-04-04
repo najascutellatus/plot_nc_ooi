@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import datetime as dt
@@ -10,6 +10,8 @@ import pickle
 import pandas as pd
 from dateutil.rrule import *
 from dateutil.relativedelta import relativedelta
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 
 S = """
     Reject outliers standard deviations of the mean.
@@ -86,7 +88,7 @@ def depth_cross_section(x, y, z):
     return fig, ax
 
 
-def format_axes(ax, x_data, y_data):
+def format_axes(ax):
     # ax.set_xlim(x_data[0], x_data[-1])
     # ax.set_ylim(y_data[0], y_data[-1])
     ax.xaxis.set_minor_locator(ticker.AutoMinorLocator())
@@ -175,22 +177,45 @@ def plot(x, y, title, stdev = None, line_style='r-o'):
 
     create_legend(ax, y_min, y_max, outliers, stdev)
     ax.set_title(title)
-    format_axes(ax, x['data'], y['data'])
+    format_axes(ax)
     set_labels(ax, x['info'], y['info'])
     return fig, ax
 
 
-def adcp(time, bins, north, east, up, title):
-    fig, ax = plt.subplots()
-    pc1 = ax.pcolor(time['data'], bins['data'], north['data'])
-    plt.colorbar(pc1)
-    # pc2 = ax2.pcolor(time['data'], bins['data'], east['data'])
-    # plt.colorbar(pc2)
-    # pc3 = ax3.pcolor(time['data'], bins['data'], up['data'])
-    # plt.colorbar(pc3)
-    # pc = ax.pcolor(x, y, z)
-    # plt.colorbar(pc)
-    return fig, ax1
+def adcp(time, bins, north, east, up, error, title):
+    p_data = [north, east, up, error]
+    horizontal_data = np.concatenate((north['data'], east['data']))
+    lim = float("%2.2f" % np.nanpercentile(abs(horizontal_data), 95))
+
+    fig, axes = plt.subplots(nrows=4, ncols=1, sharex=True, sharey=True)
+    fig.suptitle(title)
+    y_formatter = ticker.ScalarFormatter(useOffset=False)
+    plt.axis([time['data'].min(), time['data'].max(), bins['data'].min(), bins['data'].max()])
+    plt.locator_params(nbins=5)
+    tick_locator = ticker.MaxNLocator(nbins=6)
+    for i, ax in enumerate(axes.flat):
+        z_data = p_data[i]
+        subplot_label = z_data['info']['label']
+        cbar_str = z_data['info']['units']
+        ax.set_title('{}'.format(subplot_label))
+        if i < 2:
+            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-lim, vmax=lim, cmap=plt.get_cmap('bwr'))
+        elif i >= 2:
+            tlim = np.nanpercentile(abs(p_data[i]['data']), 95)
+            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-tlim, vmax=tlim, cmap=plt.get_cmap('bwr'))
+
+        format_axes(ax)
+        div = make_axes_locatable(ax)
+        cax = div.append_axes("right", size="15%", pad=0.05)
+        cbar = plt.colorbar(img, cax=cax)
+        cbar.set_label('{}'.format(cbar_str), size=8)
+        cbar.locator = tick_locator
+        cbar.update_ticks()
+
+    # resize(height=12, width=8.5)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.9)
+    return fig, axes
 
 
 def nan_plot(title):
@@ -222,8 +247,8 @@ def resize(width=12, height=8.5):
     :return: None
     """
     fig_size = plt.rcParams["figure.figsize"]
-    fig_size[0] = 12
-    fig_size[1] = 8.5
+    fig_size[0] = width
+    fig_size[1] = height
     plt.rcParams["figure.figsize"] = fig_size
     plt.rcParams["axes.xmargin"] = 0.1
     plt.rcParams["axes.ymargin"] = 0.1

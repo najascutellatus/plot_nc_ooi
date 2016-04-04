@@ -115,5 +115,5 @@ def main(files, out):
                 del sub_ds
 
 if __name__ == '__main__':
-    # main('/Users/michaesm/Documents/dev/repos/ooi-data-review/plot-nc-ooi/thredds-links/2016.03.28T11.03.00-nc-links.txt', '/Users/michaesm/Documents/')
-    main()
+    main('http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/01-OPTAAC000/recovered_host/CE09OSSM-MFD37-01-OPTAAC000-optaa_dj_dcl_instrument_recovered-recovered_host/CE09OSSM-MFD37-01-OPTAAC000-recovered_host-optaa_dj_dcl_instrument_recovered-20150409T183019-20150418T202858.nc', '/Users/michaesm/Documents/')
+    # main()
