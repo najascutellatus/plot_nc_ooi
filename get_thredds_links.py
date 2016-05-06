@@ -11,7 +11,7 @@ import plotting.plot_functions as pf
 def main(url, out):
     now = dt.datetime.now().strftime('%Y.%m.%dT%H.%M.00')
     C = Crawl(url, select=[".*ncml"])
-    tds = 'http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/'
+    tds = 'http://opendap.oceanobservatories.org:8090/thredds/dodsC/'
     pf.create_dir(out)
     fopen = open(out+ '/' + now+'-nc-links.txt', 'w')
 

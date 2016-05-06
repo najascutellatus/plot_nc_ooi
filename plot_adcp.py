@@ -37,9 +37,9 @@ def read_file(fname):
     return file_list
 
 
-# @click.command()
-# @click.argument('files', nargs=1, type=click.Path())
-# @click.argument('out', nargs=1, type=click.Path(exists=False))
+@click.command()
+@click.argument('files', nargs=1, type=click.Path())
+@click.argument('out', nargs=1, type=click.Path(exists=False))
 def main(files, out):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
@@ -78,27 +78,24 @@ def main(files, out):
                 bins = sub_ds['bin_depths']
                 north = sub_ds['northward_seawater_velocity']
                 east = sub_ds['eastward_seawater_velocity']
-                up = sub_ds['upward_seawater_velocity']
-                error = sub_ds['error_velocity']
+                # up = sub_ds['upward_seawater_velocity']
+                # error = sub_ds['error_velocity']
 
                 time = dict(data=pd.to_datetime(sub_ds['time'].data), info=dict(label=sub_ds['time'].standard_name, units='GMT'))
                 bins = dict(data=bins.data.T, info=dict(label=bins.long_name, units=bins.units))
                 north = dict(data=north.data.T, info=dict(label=north.long_name, units=north.units))
                 east = dict(data=east.data.T, info=dict(label=east.long_name, units=east.units))
-                up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
-                error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
+                # up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
+                # error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
 
                 sname = save_pre + 'ADCP-' + tt0.strftime(fmt) + '-' + tt1.strftime(fmt)
                 title = title_pre + tt0.strftime(fmt) + ' - ' + tt1.strftime(fmt)
-                fig, axs = pf.adcp(time, bins, north, east, up, error, title)
+                fig, axs = pf.adcp(time, bins, north, east, title)
                 pf.resize(width=12, height=8.5)  # Resize figure
-                pf.save_fig(save_dir, sname, res=150)  # Save figure
+                pf.save_fig(save_dir, sname, res=250)  # Save figure
                 plt.close('all')
                 # del sub_ds, x, y
 
 
 if __name__ == '__main__':
-    main('http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/01-ADCPTC000/recovered_host/CE09OSSM-RID26-01-ADCPTC000-adcp_velocity_earth-recovered_host/CE09OSSM-RID26-01-ADCPTC000-adcp_velocity_earth-recovered_host.ncml',
-        '/Users/michaesm/Documents/')
-    # main('/Users/michaesm/Documents/dev/repos/ooi-data-review/plot-nc-ooi/thredds-links.txt', '/Users/michaesm/Documents/')
-    # main()
+    main()
