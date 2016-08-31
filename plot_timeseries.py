@@ -70,7 +70,7 @@ def main(files, out):
                 eng = ['']
 
             misc = ['timestamp', 'provenance', 'qc', 'id', 'obs', 'deployment',
-                    'volts', 'counts']
+                    'volts', 'counts','quality_flag']
 
             reg_ex = re.compile('|'.join(eng + misc))  # make regular expression
 
@@ -92,7 +92,7 @@ def main(files, out):
 
                 for var in sci_vars:
                     try:
-                        # print var
+                        print var
                         sci = sub_ds[var]
                     except UnicodeEncodeError: # some comments have latex characters
                         sub_ds[var].attrs.pop('comment')  # remove from the attributes
@@ -102,7 +102,10 @@ def main(files, out):
                     try:
                         y_lab = sci.long_name
                     except AttributeError:
-                        y_lab = sci.standard_name
+                        try:
+                            y_lab = sci.standard_name
+                        except AttributeError:
+                            y_lab = var
                     y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
                     sname = save_pre + var + '-' + tt0.strftime(fmt) + '-' + tt1.strftime(fmt)
@@ -115,5 +118,4 @@ def main(files, out):
                 del sub_ds
 
 if __name__ == '__main__':
-    main('http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/01-OPTAAC000/recovered_host/CE09OSSM-MFD37-01-OPTAAC000-optaa_dj_dcl_instrument_recovered-recovered_host/CE09OSSM-MFD37-01-OPTAAC000-recovered_host-optaa_dj_dcl_instrument_recovered-20150409T183019-20150418T202858.nc', '/Users/michaesm/Documents/')
-    # main()
+    main()
