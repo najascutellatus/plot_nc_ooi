@@ -72,7 +72,11 @@ def main(files, out, time_break):
                 eng = ['']
 
             misc = ['timestamp', 'provenance', 'qc', 'id', 'obs', 'deployment',
+<<<<<<< HEAD
                     'volts', 'counts', 'quality_flag']
+=======
+                    'volts', 'counts','quality_flag']
+>>>>>>> origin/master
 
             reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
 
@@ -93,7 +97,12 @@ def main(files, out, time_break):
                     t0 = pd.to_datetime(x['data'].min()).strftime('%Y-%m-%dT%H%M%00')
                     t1 = pd.to_datetime(x['data'].max()).strftime('%Y-%m-%dT%H%M%00')
                     try:
+<<<<<<< HEAD
                         sci = ds[var]
+=======
+                        print var
+                        sci = sub_ds[var]
+>>>>>>> origin/master
                     except UnicodeEncodeError: # some comments have latex characters
                         ds[var].attrs.pop('comment')  # remove from the attributes
                         sci = ds[var]  # or else the variable won't load
@@ -101,6 +110,7 @@ def main(files, out, time_break):
                     try:
                         y_lab = sci.long_name
                     except AttributeError:
+<<<<<<< HEAD
                         y_lab = sci.standard_name
                     y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
                                                                 platform=platform, node=node, sensor=sensor))
@@ -114,6 +124,13 @@ def main(files, out, time_break):
                     save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
+=======
+                        try:
+                            y_lab = sci.standard_name
+                        except AttributeError:
+                            y_lab = var
+                    y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
+>>>>>>> origin/master
 
                     # plot timeseries with outliers removed
                     fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='r-o', g_range=True)
@@ -126,6 +143,10 @@ def main(files, out, time_break):
                 del x, y
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     times = 'time.month'
     file = 'http://opendap.oceanobservatories.org/thredds/dodsC/rest-in-class/Coastal_Endurance/CE05MOAS/05-CTDGVM000/recovered_host/CE05MOAS-GL319-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host/CE05MOAS-GL319-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host.ncml'
     main(file, '/Users/michaesm/Documents/', times)
+=======
+    main()
+>>>>>>> origin/master
