@@ -4,7 +4,7 @@ import os
 import datetime
 import calendar
 
-deployments = glob.glob('/Users/michaesm/Documents/dev/repos/petercable/asset-management-proto/deployment/*.csv')
+deployments = glob.glob('/Users/michaesm/Documents/dev/repos/ooi-integration/asset-management/deployment/*.csv')
 save_dir = ''
 
 if not save_dir:
