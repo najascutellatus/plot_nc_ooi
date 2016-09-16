@@ -2,10 +2,10 @@
 import os
 import xarray as xr
 import pandas as pd
-import plotting.plot_functions as pf
+import functions.plotting as pf
 import matplotlib.pyplot as plt
 import re
-import click as click
+# import click as click
 
 fmt = '%Y.%m.%dT%H.%M.00'
 
@@ -37,9 +37,9 @@ def read_file(fname):
     return file_list
 
 
-@click.command()
-@click.argument('files', nargs=1, type=click.Path())
-@click.argument('out', nargs=1, type=click.Path(exists=False))
+# @click.command()
+# @click.argument('files', nargs=1, type=click.Path())
+# @click.argument('out', nargs=1, type=click.Path(exists=False))
 def main(files, out):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/plot-nc-ooi.iml" filepath="$PROJECT_DIR$/.idea/plot-nc-ooi.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../.idea/repos.iml" filepath="$PROJECT_DIR$/../../.idea/repos.iml" />
     </modules>
   </component>
 </project>

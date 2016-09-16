@@ -1,2 +1,0 @@
-http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/03-CTDBPC000/recovered_host/CE09OSSM-RID27-03-CTDBPC000-ctdbp_cdef_dcl_instrument_recovered-recovered_host/CE09OSSM-RID27-03-CTDBPC000-ctdbp_cdef_dcl_instrument_recovered-recovered_host.ncml
-http://opendap-devel.ooi.rutgers.edu:8090/thredds/dodsC/first-in-class/Coastal_Endurance/CE09OSSM/03-CTDBPE000/recovered_host/CE09OSSM-MFD37-03-CTDBPE000-ctdbp_cdef_dcl_instrument_recovered-recovered_host/CE09OSSM-MFD37-03-CTDBPE000-ctdbp_cdef_dcl_instrument_recovered-recovered_host.ncml

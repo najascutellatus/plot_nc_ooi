@@ -20,3 +20,27 @@ plotting/__init__.pyc
 .idea/workspace.xml
 
 *.pyc
+
+*.pyc
+
+functions/.DS_Store
+
+*.xml
+
+*.iml
+
+*.xml
+
+*.xml
+
+*.xml
+
+.idea/inspectionProfiles/Project_Default.xml
+
+.idea/encodings.xml
+
+rest_in_class_tools/plot_timeseries.py
+
+rest_in_class_tools/plot_timeseries_overlay.py
+
+rest_in_class_tools/plot_timeseries_overlay_bymonth.py

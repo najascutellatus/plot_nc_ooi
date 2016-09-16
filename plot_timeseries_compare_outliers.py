@@ -64,7 +64,7 @@ def main(files, out, time_break):
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'timeseries')
+            save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'outliers_comparison')
             cf.create_dir(save_dir)
             try:
                 eng = stream_vars[stream]  # select specific streams engineering variables
@@ -78,10 +78,6 @@ def main(files, out, time_break):
 
             #  keep variables that are not in the regular expression
             sci_vars = [s for s in ds_variables if not reg_ex.search(s)]
-
-            # t0, t1 = pf.get_rounded_start_and_end_times(ds_disk['time'].data)
-            # tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
-            # time_list = [[t0, t1], [t0, tI], [tI, t1]]
 
             times = np.unique(ds[time_break])
 
@@ -107,19 +103,11 @@ def main(files, out, time_break):
 
                     title = title_pre + var
 
-                    # plot timeseries with outliers
-                    fig, ax = pf.auto_plot(x, y, title, stdev=None, line_style='r-o', g_range=True)
-                    pf.resize(width=12, height=8.5)  # Resize figure
-
-                    save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
-                    pf.save_fig(save_dir, save_name, res=150)  # Save figure
-                    plt.close('all')
-
                     # plot timeseries with outliers removed
-                    fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='r-o', g_range=True)
+                    fig, ax = pf.plot_outlier_comparison(x, y, title, stdev=4, line_style='r-o', g_range=True)
                     pf.resize(width=12, height=8.5)  # Resize figure
 
-                    save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
+                    save_name = '{}-{}-{}_{}_{}-{}_outlier_comparison'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
 
