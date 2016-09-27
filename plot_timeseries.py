@@ -56,7 +56,7 @@ def main(files, out, time_break):
         print nc
         with xr.open_dataset(nc, mask_and_scale=False) as ds:
             # change dimensions from 'obs' to 'time'
-            ds_disk = ds.swap_dims({'obs': 'time'})
+            ds = ds.swap_dims({'obs': 'time'})
             ds_variables = ds.data_vars.keys()  # List of dataset variables
             stream = ds.stream  # List stream name associated with the data
             title_pre = mk_str(ds.attrs, 't')  # , var, tt0, tt1, 't')
@@ -95,7 +95,7 @@ def main(files, out, time_break):
                     try:
                         sci = ds[var]
                         print var
-                        sci = sub_ds[var]
+                        # sci = sub_ds[var]
                     except UnicodeEncodeError: # some comments have latex characters
                         ds[var].attrs.pop('comment')  # remove from the attributes
                         sci = ds[var]  # or else the variable won't load
@@ -116,11 +116,11 @@ def main(files, out, time_break):
                     save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
-                        try:
-                            y_lab = sci.standard_name
-                        except AttributeError:
-                            y_lab = var
-                    y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
+                    # try:
+                    #     y_lab = sci.standard_name
+                    # except AttributeError:
+                    #     y_lab = var
+                    # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
                     # plot timeseries with outliers removed
                     fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='r-o', g_range=True)
@@ -134,6 +134,6 @@ def main(files, out, time_break):
 
 if __name__ == '__main__':
     times = 'time.month'
-    file = 'http://opendap.oceanobservatories.org/thredds/dodsC/rest-in-class/Coastal_Endurance/CE05MOAS/05-CTDGVM000/recovered_host/CE05MOAS-GL319-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host/CE05MOAS-GL319-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host.ncml'
+    file = 'http://opendap.oceanobservatories.org/thredds/dodsC/rest-in-class/Coastal_Endurance/CE05MOAS/05-CTDGVM000/recovered_host/CE05MOAS-GL311-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host/CE05MOAS-GL311-05-CTDGVM000-ctdgv_m_glider_instrument_recovered-recovered_host.ncml'
     main(file, '/Users/michaesm/Documents/', times)
 

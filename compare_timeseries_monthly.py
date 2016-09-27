@@ -88,7 +88,7 @@ for month in months_rec:
         r_var = rec[var]
         r_data = r_var.data[ind_month_rec]
 
-        t_var = rec[var]
+        t_var = tel[var]
         t_data = t_var.data[ind_month_tel]
 
         x1 = dict(data=temp_time_rec, info=dict(platform=platform, node=node, sensor=sensor,  units='GMT', label='Time', var=var))
