@@ -3,6 +3,7 @@ import os
 import xarray as xr
 import pandas as pd
 import functions.plotting as pf
+import functions.common as cf
 import matplotlib.pyplot as plt
 import re
 # import click as click
@@ -64,9 +65,9 @@ def main(files, out):
             title_pre = mk_str(ds_disk.attrs, 't')  # , var, tt0, tt1, 't')
             save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
             save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream)
-            pf.create_dir(save_dir)
+            cf.create_dir(save_dir)
 
-            t0, t1 = pf.get_rounded_start_and_end_times(ds_disk['time'].data)
+            t0, t1 = cf.get_rounded_start_and_end_times(ds_disk['time'].data)
             tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
             time_list = [[t0, t1], [t0, tI], [tI, t1]]
             # time_list = [[t0, t1]]
@@ -98,4 +99,5 @@ def main(files, out):
 
 
 if __name__ == '__main__':
-    main()
+    # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
+    main("/Users/knuth/Desktop/devel/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam_20161007T000000.687391-20161007T080059.786676.nc", ".")

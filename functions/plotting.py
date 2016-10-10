@@ -21,20 +21,21 @@ def adcp(time, bins, north, east, title):
     plt.axis([time['data'].min(), time['data'].max(), bins['data'].min(), bins['data'].max()])
     plt.locator_params(nbins=5)
     tick_locator = ticker.MaxNLocator(nbins=6)
+    # need to add label to y axis
     for i, ax in enumerate(axes.flat):
         z_data = p_data[i]
         subplot_label = z_data['info']['label']
         cbar_str = z_data['info']['units']
         ax.set_title('{}'.format(subplot_label))
         if i < 2:
-            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-lim, vmax=lim, cmap=plt.get_cmap('bwr'))
+            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-lim, vmax=lim, cmap=plt.get_cmap('jet'))
         elif i >= 2:
             tlim = np.nanpercentile(abs(p_data[i]['data']), 90)
-            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-tlim, vmax=tlim, cmap=plt.get_cmap('bwr'))
+            img = ax.pcolormesh(time['data'], bins['data'], p_data[i]['data'], vmin=-tlim, vmax=tlim, cmap=plt.get_cmap('jet'))
 
         format_axes(ax)
         div = make_axes_locatable(ax)
-        cax = div.append_axes("right", size="15%", pad=0.05)
+        cax = div.append_axes("right", size="3%", pad=0.05)
         cbar = plt.colorbar(img, cax=cax)
         cbar.set_label('{}'.format(cbar_str), size=8)
         cbar.locator = tick_locator
