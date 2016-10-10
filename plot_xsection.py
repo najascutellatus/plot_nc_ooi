@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 import os
 import xarray as xr
 import pandas as pd
@@ -43,6 +42,12 @@ def main(files, out, time_break):
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
     """
+
+
+
+
+
+
     fname, ext = os.path.splitext(files)
     if ext in '.nc':
         list_files = [files]
@@ -99,6 +104,26 @@ def main(files, out, time_break):
                     except UnicodeEncodeError: # some comments have latex characters
                         ds[var].attrs.pop('comment')  # remove from the attributes
                         sci = ds[var]  # or else the variable won't load
+                    
+
+                    # define possible pressure variables
+                    pressure_vars = ['seawater_pressure', 'sci_water_pressure_dbar',
+                                     'ctdgv_m_glider_instrument_recovered-sci_water_pressure_dbar',
+                                     'ctdgv_m_glider_instrument-sci_water_pressure_dbar']
+                    rePressure = re.compile('|'.join(pressure_vars))
+
+                    # define y as pressure variable   
+                    pressure = [s for s in sci.variables if rePressure.search(s)]
+                    pressure = ''.join(pressure)
+                    y = sci.variables[pressure]
+                    yN = pressure
+                    y_units = sci.units
+
+
+                    
+
+
+
 
                     try:
                         y_lab = sci.long_name
@@ -106,6 +131,10 @@ def main(files, out, time_break):
                         y_lab = sci.standard_name
                     y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
                                                                 platform=platform, node=node, sensor=sensor))
+
+
+
+
 
                     title = title_pre + var
 
@@ -116,14 +145,16 @@ def main(files, out, time_break):
                     save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
-                    # try:
-                    #     y_lab = sci.standard_name
-                    # except AttributeError:
-                    #     y_lab = var
-                    # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
-                    # plot timeseries with outliers removed
-                    fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='r-o', g_range=True)
+
+
+                    # plot z variable each time
+
+
+
+                    fig, ax = pf.depth_cross_section(x, y, title, stdev=1, line_style='r-o', g_range=True)
+
+
                     pf.resize(width=12, height=8.5)  # Resize figure
 
                     save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
@@ -132,8 +163,10 @@ def main(files, out, time_break):
 
                 del x, y
 
+
+
+
 if __name__ == '__main__':
     times = 'time.month'
     file = '/Users/knuth/Downloads/deployment0000_RS01SBPS-SF01A-2A-CTDPFA102-streamed-ctdpf_sbe43_sample_20161010T120000.136094-20161010T160100.317451.nc'
     main(file, '/Users/knuth/Desktop/devel', times)
-
