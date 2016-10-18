@@ -134,6 +134,6 @@ def main(files, out, time_break):
 
 if __name__ == '__main__':
     times = 'time.month'
-    file = '/Users/knuth/Downloads/deployment0000_RS01SBPS-SF01A-2A-CTDPFA102-streamed-ctdpf_sbe43_sample_20161010T120000.136094-20161010T160100.317451.nc'
-    main(file, '/Users/knuth/Desktop/devel', times)
+    file = 'http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T065829-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0000_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml'
+    main(file, '/Users/knuth/Desktop/adcp/timeseries', times)
 
