@@ -64,7 +64,7 @@ def main(files, out):
             stream = ds_disk.stream  # List stream name associated with the data
             title_pre = mk_str(ds_disk.attrs, 't')  # , var, tt0, tt1, 't')
             save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
-            save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream)
+            save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream, 'pcolor')
             cf.create_dir(save_dir)
 
             t0, t1 = cf.get_rounded_start_and_end_times(ds_disk['time'].data)
@@ -100,4 +100,4 @@ def main(files, out):
 
 if __name__ == '__main__':
     # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
-    main("/Users/knuth/Desktop/devel/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam_20161007T000000.687391-20161007T080059.786676.nc", ".")
+    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T065829-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0000_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp")
