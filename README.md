@@ -1,5 +1,5 @@
 # plot-nc-ooi
-This is a python script that plots netCDF datasets. 
+This toolbox contains python scripts that plot netCDF datasets. 
 
 ##Contents
 - [Introduction](#introduction)
