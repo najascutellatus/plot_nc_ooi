@@ -84,7 +84,7 @@ def main(files, out, time_break):
             # time_list = [[t0, t1], [t0, tI], [tI, t1]]
 
             times = np.unique(ds[time_break])
-
+            
             for t in times:
                 time_ind = t == ds[time_break].data
                 for var in sci_vars:
@@ -129,11 +129,10 @@ def main(files, out, time_break):
                     save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
-
                 del x, y
 
 if __name__ == '__main__':
     times = 'time.month'
-    file = 'http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T065829-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0000_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml'
+    file = 'http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml'
     main(file, '/Users/knuth/Desktop/adcp/timeseries', times)
 
