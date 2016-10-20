@@ -100,4 +100,4 @@ def main(files, out):
 
 if __name__ == '__main__':
     # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
-    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T065829-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0000_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp")
+    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T072411-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0001_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp")
