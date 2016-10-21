@@ -57,7 +57,12 @@ def main(files, out):
     stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
     for nc in list_files:
         print nc
-        with xr.open_dataset(nc) as ds_disk:
+
+        # the engine that xarray uses can be changed as specified here 
+        # http://xarray.pydata.org/en/stable/generated/xarray.open_dataset.html#xarray.open_dataset
+
+        with xr.open_dataset(nc, engine='netcdf4') as ds_disk:
+
             # change dimensions from 'obs' to 'time'
             ds_disk = ds_disk.swap_dims({'obs': 'time'})
             ds_variables = ds_disk.data_vars.keys()  # List of dataset variables
@@ -100,4 +105,4 @@ def main(files, out):
 
 if __name__ == '__main__':
     # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
-    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161018T072411-CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam/deployment0001_CE02SHBP-LJ01D-05-ADCPTB104-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp")
+    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161019T085827-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp/month/")

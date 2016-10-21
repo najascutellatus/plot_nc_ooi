@@ -250,7 +250,10 @@ def plot(x, y, title, stdev = None, line_style='r-o', g_ranges=False):
     ax.set_title(title)
 
     # Format legend
-    leg_text = ('$\max:$ {:6.4f}\n$\min:$ {:6.4f}\n{}'.format(np.nanmax(y['data']), np.nanmin(y['data']), outlier_text),)
+    try:
+        leg_text = ('$\max:$ {:6.4f}\n$\min:$ {:6.4f}\n{}'.format(np.nanmax(y['data']), np.nanmin(y['data']), outlier_text),)
+    except ValueError:
+        leg_text = ()
 
     if g_ranges:
         gr = add_global_ranges(ax, y)
