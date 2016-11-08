@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='plot-nc-ooi',
-    version='1',
+    version='1.0',
     packages=['functions'],
     url='https://github.com/ooi-data-review/plot-nc-ooi',
     license='',
