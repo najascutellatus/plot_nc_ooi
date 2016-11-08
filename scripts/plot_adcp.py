@@ -55,54 +55,54 @@ def main(files, out):
         list_files = read_file(files)
 
     stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
-    for nc in list_files:
-        print nc
+    # for nc in list_files:
+    #     print nc
 
         # the engine that xarray uses can be changed as specified here 
         # http://xarray.pydata.org/en/stable/generated/xarray.open_dataset.html#xarray.open_dataset
 
-        with xr.open_dataset(nc, engine='netcdf4') as ds_disk:
+    with xr.open_mfdataset(list_files, engine='netcdf4') as ds_disk:
 
-            # change dimensions from 'obs' to 'time'
-            ds_disk = ds_disk.swap_dims({'obs': 'time'})
-            ds_variables = ds_disk.data_vars.keys()  # List of dataset variables
-            stream = ds_disk.stream  # List stream name associated with the data
-            title_pre = mk_str(ds_disk.attrs, 't')  # , var, tt0, tt1, 't')
-            save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
-            save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream, 'pcolor')
-            cf.create_dir(save_dir)
+        # change dimensions from 'obs' to 'time'
+        ds_disk = ds_disk.swap_dims({'obs': 'time'})
+        ds_variables = ds_disk.data_vars.keys()  # List of dataset variables
+        stream = ds_disk.stream  # List stream name associated with the data
+        title_pre = mk_str(ds_disk.attrs, 't')  # , var, tt0, tt1, 't')
+        save_pre = mk_str(ds_disk.attrs, 's')  # , var, tt0, tt1, 's')
+        save_dir = os.path.join(out, ds_disk.subsite, ds_disk.node, ds_disk.stream, 'pcolor')
+        cf.create_dir(save_dir)
 
-            t0, t1 = cf.get_rounded_start_and_end_times(ds_disk['time'].data)
-            tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
-            time_list = [[t0, t1], [t0, tI], [tI, t1]]
-            # time_list = [[t0, t1]]
+        # t0, t1 = cf.get_rounded_start_and_end_times(ds_disk['time'].data)
+        # tI = t0 + t1 - (t0 / 2)
+        # time_list = [[t0, t1], [t0, tI], [tI, t1]]
+        # time_list = [[t0, t1]]
 
-            for period in time_list:
-                tt0 = period[0]
-                tt1 = period[1]
-                sub_ds = ds_disk.sel(time=slice(str(tt0), str(tt1)))
-                bins = sub_ds['bin_depths']
-                north = sub_ds['northward_seawater_velocity']
-                east = sub_ds['eastward_seawater_velocity']
-                # up = sub_ds['upward_seawater_velocity']
-                # error = sub_ds['error_velocity']
+        # for period in time_list:
+        #     tt0 = period[0]
+        #     tt1 = period[1]
+        #     sub_ds = ds_disk.sel(time=slice(str(tt0), str(tt1)))
+        bins = ds_disk['bin_depths']
+        north = ds_disk['northward_seawater_velocity']
+        east = ds_disk['eastward_seawater_velocity']
+        # up = ds_disk['upward_seawater_velocity']
+        # error = ds_disk['error_velocity']
 
-                time = dict(data=pd.to_datetime(sub_ds['time'].data), info=dict(label=sub_ds['time'].standard_name, units='GMT'))
-                bins = dict(data=bins.data.T, info=dict(label=bins.long_name, units=bins.units))
-                north = dict(data=north.data.T, info=dict(label=north.long_name, units=north.units))
-                east = dict(data=east.data.T, info=dict(label=east.long_name, units=east.units))
-                # up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
-                # error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
+        time = dict(data=ds_disk['time'].data, info=dict(label=ds_disk['time'].standard_name, units='GMT'))
+        bins = dict(data=bins.data.T, info=dict(label=bins.long_name, units=bins.units))
+        north = dict(data=north.data.T, info=dict(label=north.long_name, units=north.units))
+        east = dict(data=east.data.T, info=dict(label=east.long_name, units=east.units))
+        # up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
+        # error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
 
-                sname = save_pre + 'ADCP-' + tt0.strftime(fmt) + '-' + tt1.strftime(fmt)
-                title = title_pre + tt0.strftime(fmt) + ' - ' + tt1.strftime(fmt)
-                fig, axs = pf.adcp(time, bins, north, east, title)
-                pf.resize(width=12, height=8.5)  # Resize figure
-                pf.save_fig(save_dir, sname, res=250)  # Save figure
-                plt.close('all')
-                # del sub_ds, x, y
+        sname = save_pre + 'ADCP'
+        title = title_pre
+        fig, axs = pf.adcp(time, bins, north, east, title)
+        pf.resize(width=12, height=8.5)  # Resize figure
+        pf.save_fig(save_dir, sname, res=250)  # Save figure
+        plt.close('all')
+            # del sub_ds, x, y
 
 
 if __name__ == '__main__':
     # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
-    main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161019T085827-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", "/Users/knuth/Desktop/adcp/month/")
+    main("/Users/knuth/Desktop/adcpfiles.txt", "/Users/knuth/Desktop/adcp/month/")
