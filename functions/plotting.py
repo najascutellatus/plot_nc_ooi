@@ -18,7 +18,7 @@ def adcp(time, bins, north, east, title):
     fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True, sharey=True)
     fig.suptitle(title)
     y_formatter = ticker.ScalarFormatter(useOffset=False)
-    plt.axis([time['data'].min(), time['data'].max(), bins['data'].min(), bins['data'].max()])
+    # plt.axis([time['data'].min(), time['data'].max(), bins['data'].min(), bins['data'].max()])
     plt.locator_params(nbins=5)
     tick_locator = ticker.MaxNLocator(nbins=6)
     # need to add label to y axis
