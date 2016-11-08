@@ -66,15 +66,17 @@ def main(files, out, time_break):
             sensor = ds.sensor
             save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'timeseries')
             cf.create_dir(save_dir)
-            try:
-                eng = stream_vars[stream]  # select specific streams engineering variables
-            except KeyError:
-                eng = ['']
 
-            misc = ['timestamp', 'provenance', 'qc', 'id', 'obs', 'deployment',
-                    'volts', 'counts', 'quality_flag']
+            # try:
+            #     eng = stream_vars[stream]  # select specific streams engineering variables
+            # except KeyError:
+            #     eng = ['']
 
-            reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
+            misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
+            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm']
+
+            # reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
+            reg_ex = re.compile('|'.join(misc))
 
             #  keep variables that are not in the regular expression
             sci_vars = [s for s in ds_variables if not reg_ex.search(s)]
