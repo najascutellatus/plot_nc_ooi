@@ -18,15 +18,15 @@ This script is used to generate timeseries plots from netCDF or ncml files, betw
 
 
 # specify input and output
-urls = ['/Users/knuth/Downloads/deployment0003_RS03AXBS-LJ03A-12-CTDPFB301-streamed-ctdpf_optode_sample_20160915T183110.280201-20160916T003109.985797.nc']
-save_dir = '/Users/knuth/Downloads/'
+urls = ['http://opendap.oceanobservatories.org/thredds/dodsC/ooi/friedrich-knuth-gmail/20170104T200503-RS03AXBS-MJ03A-06-PRESTA301-streamed-prest_real_time/deployment0002_RS03AXBS-MJ03A-06-PRESTA301-streamed-prest_real_time_20161207T154038.847154-20170104T154023.267870.nc']
+out = '/Users/knuth/Desktop'
 
 
 
 
 # enter desired plotting time frame
-start_time = datetime.datetime(2016, 9, 15, 00, 0, 0)
-end_time = datetime.datetime(2016, 9, 15, 23, 0, 0)
+start_time = datetime.datetime(2016, 12, 07, 0, 0, 0)
+end_time = datetime.datetime(2017, 2, 04, 0, 0, 0)
 
 
 
@@ -88,6 +88,21 @@ def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
     plt.close()
 
 
+def mk_str(attrs, str_type='t'):
+    """
+    make a string of either 't' for title. 's' for file save name.
+    """
+    site = attrs['subsite']
+    node = attrs['node']
+    sensor = attrs['sensor']
+    stream = attrs['stream']
+
+    if str_type is 's':
+        string = site + '-' + node + '-' + sensor + '-' + stream + '-'
+    else:
+        string = site + '-' + node + '\nStream: ' + stream + '\n' + 'Variable: '
+    return string
+
 
 
 for url in urls:
@@ -97,6 +112,15 @@ for url in urls:
     f_slice = f.sel(time=slice(start_time,end_time)) # select only deployment dates provided
     fN = f_slice.source
     
+    stream = f.stream  # List stream name associated with the data
+    title_pre = mk_str(f.attrs, 't')  # , var, tt0, tt1, 't')
+    save_pre = mk_str(f.attrs, 's')  # , var, tt0, tt1, 's')
+    platform = f.subsite
+    node = f.node
+    sensor = f.sensor
+    save_dir = os.path.join(out, f.subsite, f.node, f.stream, 'timeseries')
+    createDir(save_dir)
+
     global fName
     head, tail = os.path.split(url)
     fName = tail.split('.', 1)[0]
