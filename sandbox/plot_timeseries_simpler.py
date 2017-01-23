@@ -9,7 +9,6 @@ import numpy as np
 import re
 import datetime
 import sys
-import datetime
 
 '''
 This script is used to generate timeseries plots from netCDF or ncml files, between a time range specified by the user.
@@ -18,15 +17,15 @@ This script is used to generate timeseries plots from netCDF or ncml files, betw
 
 
 # specify input and output
-urls = ['http://opendap.oceanobservatories.org/thredds/dodsC/ooi/friedrich-knuth-gmail/20170104T200503-RS03AXBS-MJ03A-06-PRESTA301-streamed-prest_real_time/deployment0002_RS03AXBS-MJ03A-06-PRESTA301-streamed-prest_real_time_20161207T154038.847154-20170104T154023.267870.nc']
-out = '/Users/knuth/Desktop'
+files = '/Users/knuth/Desktop/PREST/files/*.nc'
+out = '/Users/knuth/Desktop/PREST/plots'
 
 
 
 
 # enter desired plotting time frame
-start_time = datetime.datetime(2016, 12, 07, 0, 0, 0)
-end_time = datetime.datetime(2017, 2, 04, 0, 0, 0)
+start_time = datetime.datetime(2014, 10, 06, 0, 0, 0)
+end_time = datetime.datetime(2017, 1, 21, 0, 0, 0)
 
 
 
@@ -105,61 +104,60 @@ def mk_str(attrs, str_type='t'):
 
 
 
-for url in urls:
-    print url
-    f = xr.open_dataset(url)
-    f = f.swap_dims({'obs':'time'})
-    f_slice = f.sel(time=slice(start_time,end_time)) # select only deployment dates provided
-    fN = f_slice.source
-    
-    stream = f.stream  # List stream name associated with the data
-    title_pre = mk_str(f.attrs, 't')  # , var, tt0, tt1, 't')
-    save_pre = mk_str(f.attrs, 's')  # , var, tt0, tt1, 's')
-    platform = f.subsite
-    node = f.node
-    sensor = f.sensor
-    save_dir = os.path.join(out, f.subsite, f.node, f.stream, 'timeseries')
-    createDir(save_dir)
+print files
+f = xr.open_mfdataset(files)
+f = f.swap_dims({'obs':'time'})
+f_slice = f.sel(time=slice(start_time,end_time)) # select only deployment dates provided
+fN = f_slice.source
 
-    global fName
-    head, tail = os.path.split(url)
-    fName = tail.split('.', 1)[0]
-    title = fName[0:27]
-    
-    t = f_slice['time'].data
-    t0 = t[0] # first timestamp
-    t1 = t[-1] # last timestamp
+stream = f.stream  # List stream name associated with the data
+title_pre = mk_str(f.attrs, 't')  # , var, tt0, tt1, 't')
+save_pre = mk_str(f.attrs, 's')  # , var, tt0, tt1, 's')
+platform = f.subsite
+node = f.node
+sensor = f.sensor
+save_dir = os.path.join(out, f.subsite, f.node, f.stream, 'timeseries')
+createDir(save_dir)
 
+global fName
+head, tail = os.path.split(files)
+fName = tail.split('.', 1)[0]
+title = fName[0:27]
+
+t = f_slice['time'].data
+t0 = t[0] # first timestamp
+t1 = t[-1] # last timestamp
 
 
-    varList = []
-    for vars in f_slice.variables:
-        varList.append(str(vars))
 
-    # for i in varList:
-    #     print i
+varList = []
+for vars in f_slice.variables:
+    varList.append(str(vars))
 
-    yVars = [s for s in varList if not reg_ex.search(s)]
+# for i in varList:
+#     print i
 
-    for v in yVars:
-        print v
+yVars = [s for s in varList if not reg_ex.search(s)]
 
-        y = f_slice[v]
-        yD = y.data
+for v in yVars:
+    print v
 
-        try:
-            ymin = np.nanmin(yD)
-        except TypeError:
-            ymin = ""
-            continue
+    y = f_slice[v]
+    yD = y.data
 
-        try:
-            ymax = np.nanmax(yD)
-        except TypeError:
-            ymax = ""
-            continue
+    try:
+        ymin = np.nanmin(yD)
+    except TypeError:
+        ymin = ""
+        continue
 
-        plotArgs = (fName, v, save_dir)
-        plot_timeseries(t, y, ymin, ymax, t0, t1, plotArgs)
+    try:
+        ymax = np.nanmax(yD)
+    except TypeError:
+        ymax = ""
+        continue
+
+    plotArgs = (fName, v, save_dir)
+    plot_timeseries(t, y, ymin, ymax, t0, t1, plotArgs)
 
 
