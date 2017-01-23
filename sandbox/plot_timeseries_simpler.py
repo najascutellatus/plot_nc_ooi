@@ -14,23 +14,18 @@ import sys
 This script is used to generate timeseries plots from netCDF or ncml files, between a time range specified by the user.
 '''
 
-
-
 # specify input and output
 files = '/Users/knuth/Desktop/PREST/files/*.nc'
 out = '/Users/knuth/Desktop/PREST/plots'
 
 
-
-
-# enter desired plotting time frame
-start_time = datetime.datetime(2014, 10, 06, 0, 0, 0)
+# enter desired plotting time frame and standard deviation of outliers to reject
+start_time = datetime.datetime(2016, 10, 06, 0, 0, 0)
 end_time = datetime.datetime(2017, 1, 21, 0, 0, 0)
+stdev = 3
 
 
-
-
-# Identifies variables to skip when plotting
+# identify variables to skip when plotting
 misc_vars = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
             'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm']
 reg_ex = re.compile('|'.join(misc_vars))
@@ -49,6 +44,12 @@ def createDir(newDir):
             else:
                 raise
 
+def reject_outliers(data, m=3):
+    # function to reject outliers beyond 3 standard deviations of the mean.
+    # data: numpy array containing data
+    # m: the number of standard deviations from the mean. Default: 3
+    return abs(data - np.nanmean(data)) < m * np.nanstd(data)
+
 def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
 
     yD = y.data
@@ -57,6 +58,7 @@ def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
     plt.grid()
     plt.margins(y=.1, x=.1)
     plt.scatter(t, yD, marker='.',lw=.2)
+    plt.tight_layout()
 
     # Format start and end timestamps, t0 and t1, for legend
     t_min = str(t0)
@@ -79,6 +81,7 @@ def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
     # Labels
     ax.set_ylabel(args[1] + " ("+ y.units + ")")
     ax.set_title(args[0], fontsize=9)
+    # ax.legend(["Min: %f" % ymin + "\nMax: %f" % ymax + "\nTMin: %s" % t_min + "\nTMax: %s" % t_max + "\nOutliers: %s" % outliers], loc='best', fontsize=5)
     ax.legend(["Min: %f" % ymin + "\nMax: %f" % ymax + "\nTMin: %s" % t_min + "\nTMax: %s" % t_max], loc='best', fontsize=5)
 
     filename = args[0] + "_" + args[1]
@@ -141,8 +144,19 @@ yVars = [s for s in varList if not reg_ex.search(s)]
 
 for v in yVars:
     print v
-
     y = f_slice[v]
+    # print y
+
+    # if stdev is None:
+    #     y = y
+    #     outlier_text = ''
+    # else:
+    #     ind = reject_outliers(y, stdev)
+    #     y = y[ind]
+    #     t = t[ind]
+    #     outliers = str(len(ind) - sum(ind))
+    #     # outlier_text = 'n removed $\pm$ {}$\sigma: $ {}'.format(stdev, outliers)
+
     yD = y.data
 
     try:
