@@ -20,7 +20,7 @@ out = '/Users/knuth/Desktop/PREST/plots'
 
 
 # enter desired plotting time frame and standard deviation of outliers to reject
-start_time = datetime.datetime(2016, 10, 06, 0, 0, 0)
+start_time = datetime.datetime(2014, 10, 06, 0, 0, 0)
 end_time = datetime.datetime(2017, 1, 21, 0, 0, 0)
 stdev = 3
 
@@ -58,7 +58,6 @@ def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
     plt.grid()
     plt.margins(y=.1, x=.1)
     plt.scatter(t, yD, marker='.',lw=.2)
-    plt.tight_layout()
 
     # Format start and end timestamps, t0 and t1, for legend
     t_min = str(t0)
@@ -86,6 +85,10 @@ def plot_timeseries(t, y, ymin, ymax, t0, t1, args):
 
     filename = args[0] + "_" + args[1]
     save_file = os.path.join(args[2], filename)  # create save file name
+
+    ax.xaxis_date()
+    fig.autofmt_xdate()
+
     plt.savefig(str(save_file),dpi=150) # save figure
     plt.close()
 
