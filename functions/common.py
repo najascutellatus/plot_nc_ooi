@@ -4,6 +4,9 @@ import pandas as pd
 import requests
 import numpy as np
 
+requests.packages.urllib3.disable_warnings()
+
+
 
 def create_dir(new_dir):
     # Check if dir exists.. if it doesn't... create it.
@@ -72,15 +75,31 @@ def get_time_ind(array, t0, t1):
     return time_ind
 
 
-def get_global_ranges(platform, node, sensor, variable):
-    url = 'http://ooiufs01.ooi.rutgers.edu:12578/qcparameters/inv/{}/{}/{}/'.format(platform, node, sensor)
+def get_global_ranges(platform, node, sensor, variable, api_user=None, api_token=None):
+    port = '12578'
+    base_url = '{}/qcparameters/inv/{}/{}/{}/'.format(port, platform, node, sensor)
+    url = 'https://ooinet.oceanobservatories.org/api/m2m/{}'.format(base_url)
+    if (api_user is None) or (api_token is None):
+        r = requests.get(url, verify=False)
+    else:
+        r = requests.get(url, auth=(api_user, api_token), verify=False)
 
-    r = requests.get(url)
-
-    # if r.status_code is 200:
-    values = pd.io.json.json_normalize(r.json())
-    t1 = values[values['qcParameterPK.streamParameter'] == variable]
-    t2 = t1[t1['qcParameterPK.qcId'] == 'dataqc_globalrangetest_minmax']
-    local_min = t2[t2['qcParameterPK.parameter'] == 'dat_min'].iloc[0]['value']
-    local_max = t2[t2['qcParameterPK.parameter'] == 'dat_max'].iloc[0]['value']
-    return [int(local_min), int(local_max)]
+    if r.status_code is 200:
+        if r.json(): # If r.json is not empty
+            values = pd.io.json.json_normalize(r.json())
+            t1 = values[values['qcParameterPK.streamParameter'] == variable]
+            if not t1.empty:
+                t2 = t1[t1['qcParameterPK.qcId'] == 'dataqc_globalrangetest_minmax']
+                if not t2.empty:
+                    local_min = float(t2[t2['qcParameterPK.parameter'] == 'dat_min'].iloc[0]['value'])
+                    local_max = float(t2[t2['qcParameterPK.parameter'] == 'dat_max'].iloc[0]['value'])
+                else:
+                    local_min = 'N/A'
+                    local_max = 'N/A'
+            else:
+                local_min = 'N/A'
+                local_max = 'N/A'
+        else:
+            local_min = 'N/A'
+            local_max = 'N/A'
+    return [local_min, local_max]
