@@ -7,7 +7,7 @@ import numpy as np
 import urllib2 as url
 import pickle
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from functions.common import get_global_ranges, reject_outliers
+from functions.common import reject_outliers
 
 
 def adcp(time, bins, north, east, title):
@@ -49,10 +49,11 @@ def adcp(time, bins, north, east, title):
 
 def add_global_ranges(ax, data):
     try:
-        global_ranges = get_global_ranges(data['info']['platform'], data['info']['node'], data['info']['sensor'], data['info']['var'])
-        ax.set_autoscale_on(False)
-        g1 = plt.axhline(global_ranges[0], color='g', linestyle='--', label='Global $\min$')
-        g2 = plt.axhline(global_ranges[1], color='g', linestyle='--', label='Global $\max$')
+        global_ranges = [None, None]
+        # get_global_ranges(data['info']['platform'], data['info']['node'], data['info']['sensor'], data['info']['var'])
+        # ax.set_autoscale_on(False)
+        # g1 = plt.axhline(global_ranges[0], color='g', linestyle='--', label='Global $\min$')
+        # g2 = plt.axhline(global_ranges[1], color='g', linestyle='--', label='Global $\max$')
     except IndexError:
         print 'No global ranges exist for this reference designator yet.'
         global_ranges = [None, None]
