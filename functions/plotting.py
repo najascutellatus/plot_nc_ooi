@@ -53,7 +53,7 @@ def add_global_ranges(ax, data):
         ax.set_autoscale_on(False)
         g1 = plt.axhline(global_ranges[0], color='g', linestyle='--', label='Global $\min$')
         g2 = plt.axhline(global_ranges[1], color='g', linestyle='--', label='Global $\max$')
-    except IndexError:
+    except (IndexError, ValueError):
         print 'No global ranges exist for this reference designator yet.'
         global_ranges = [None, None]
     return global_ranges
