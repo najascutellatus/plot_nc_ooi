@@ -7,9 +7,9 @@ import functions.common as cf
 import matplotlib.pyplot as plt
 import re
 import numpy as np
-import calendar
 
 fmt = '%Y.%m.%dT%H.%M.00'
+
 
 def mk_str(attrs, str_type='t'):
     """
@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, time_break):
+def main(files, out, time_break='full'):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -58,19 +58,12 @@ def main(files, out, time_break):
             # change dimensions from 'obs' to 'time'
             ds = ds.swap_dims({'obs': 'time'})
             ds_variables = ds.data_vars.keys()  # List of dataset variables
-            stream = ds.stream  # List stream name associated with the data
             title_pre = mk_str(ds.attrs, 't')  # , var, tt0, tt1, 't')
-            save_pre = mk_str(ds.attrs, 's')  # , var, tt0, tt1, 's')
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
             save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'timeseries')
             cf.create_dir(save_dir)
-
-            # try:
-            #     eng = stream_vars[stream]  # select specific streams engineering variables
-            # except KeyError:
-            #     eng = ['']
 
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
             'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm']
@@ -81,14 +74,17 @@ def main(files, out, time_break):
             #  keep variables that are not in the regular expression
             sci_vars = [s for s in ds_variables if not reg_ex.search(s)]
 
-            # t0, t1 = pf.get_rounded_start_and_end_times(ds_disk['time'].data)
-            # tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
-            # time_list = [[t0, t1], [t0, tI], [tI, t1]]
-
-            times = np.unique(ds[time_break])
+            if not time_break is 'full':
+                times = np.unique(ds[time_break])
+            else:
+                times = [0]
             
             for t in times:
-                time_ind = t == ds[time_break].data
+                if not time_break is 'full':
+                    time_ind = t == ds[time_break].data
+                else:
+                    time_ind = np.ones(ds['time'].data.shape, dtype=bool) # index all times to be set to True
+
                 for var in sci_vars:
                     x = dict(data=ds['time'].data[time_ind],
                              info=dict(label='Time', units='GMT'))
@@ -97,7 +93,6 @@ def main(files, out, time_break):
                     try:
                         sci = ds[var]
                         print var
-                        # sci = sub_ds[var]
                     except UnicodeEncodeError: # some comments have latex characters
                         ds[var].attrs.pop('comment')  # remove from the attributes
                         sci = ds[var]  # or else the variable won't load
@@ -118,11 +113,6 @@ def main(files, out, time_break):
                     save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
                     pf.save_fig(save_dir, save_name, res=150)  # Save figure
                     plt.close('all')
-                    # try:
-                    #     y_lab = sci.standard_name
-                    # except AttributeError:
-                    #     y_lab = var
-                    # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
                     # plot timeseries with outliers removed
                     fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='r-o', g_range=True)
@@ -134,7 +124,7 @@ def main(files, out, time_break):
                 del x, y
 
 if __name__ == '__main__':
-    times = 'time.month'
+    times = 'time.month' # set times = 'full' to plot entire dataset
     file = 'http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml'
     main(file, '/Users/knuth/Desktop/adcp/timeseries', times)
 
