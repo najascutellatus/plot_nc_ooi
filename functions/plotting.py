@@ -59,7 +59,7 @@ def add_global_ranges(ax, data):
     return global_ranges
 
 
-def auto_plot(x, y, title, stdev=None, line_style='r-o', g_range=False):
+def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color='midnightblue'):
     """
     :param x: x data
     :type x: dictionary
@@ -214,7 +214,7 @@ def nan_plot(title):
     return fig, ax
 
 
-def plot(x, y, title, stdev = None, line_style='r-o', g_ranges=False):
+def plot(x, y, title, stdev = None, line_style='.', g_ranges=False, color='midnightblue'):
     """
 
     :param x: Dictionary must be in the form:
@@ -245,7 +245,7 @@ def plot(x, y, title, stdev = None, line_style='r-o', g_ranges=False):
     fig, ax = plt.subplots()
     # ax.set_autoscale_on(False)
     plt.grid()
-    plt.plot(x['data'], y['data'], line_style, linewidth=2, markersize=2)
+    plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=1)
 
     ax.set_title(title)
 

@@ -38,12 +38,11 @@ def read_file(fname):
     return file_list
 
 
-def main(nc, directory, out, time_break, depth, breakdown):
+def main(nc, directory, out, time_break, breakdown):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
     """
-
     list_files = directory + "/*.nc"
 
     stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
@@ -56,7 +55,7 @@ def main(nc, directory, out, time_break, depth, breakdown):
         node = ds_ncfile.node
         sensor = ds_ncfile.sensor
         # save_dir = os.path.join(out, platform, node, stream, 'xsection_depth_profiles')
-        save_dir = os.path.join(out,'xsection_depth_profiles', breakdown)
+        save_dir = os.path.join(out,'timeseries',breakdown)
         cf.create_dir(save_dir)
 
 
@@ -100,22 +99,17 @@ def main(nc, directory, out, time_break, depth, breakdown):
                     ds[var].attrs.pop('comment')  # remove from the attributes
                     sci = ds[var]  # or else the variable won't load
 
-
-                y = dict(data=ds[depth].data[time_ind], info=dict(label='Pressure', units='dbar', var=var,
-                                                            platform=platform, node=node, sensor=sensor))
-
-                
                 try:
-                    z_lab = sci.long_name
+                    y_lab = sci.long_name
                 except AttributeError:
-                    z_lab = sci.standard_name
-                z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=sci.units, var=var,
+                    y_lab = sci.standard_name
+                y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
                                                             platform=platform, node=node, sensor=sensor))
 
                 title = title_pre + var
 
                 # plot timeseries with outliers
-                fig, ax = pf.depth_cross_section(x, y, z, title=title)
+                fig, ax = pf.auto_plot(x, y, title, stdev=None, line_style='.', g_range=True)
                 pf.resize(width=12, height=8.5)  # Resize figure
 
                 save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
@@ -127,13 +121,18 @@ def main(nc, directory, out, time_break, depth, breakdown):
                 #     y_lab = var
                 # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
-            del x, y
+                # plot timeseries with outliers removed
+                # fig, ax = pf.auto_plot(x, y, title, stdev=1, line_style='.', g_range=True)
+                # pf.resize(width=12, height=8.5)  # Resize figure
 
+                # save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
+                # pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                # plt.close('all')
+            del x, y
 if __name__ == '__main__':
     nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment3/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160714T211800.492217-20161008T115959.708545.nc'
-    depth = 'seawater_pressure'
     times = 'time.year'
     breakdown = 'by_year'
     location = '/Users/knuth/Desktop/CTDPFA302/deployment3'
-    main(nc_file, location, '/Users/knuth/Desktop/CTDPFA302/deployment3/plots', times, depth, breakdown)
+    main(nc_file, location, '/Users/knuth/Desktop/CTDPFA302/deployment3/plots', times, breakdown)
 
