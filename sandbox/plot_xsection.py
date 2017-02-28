@@ -44,10 +44,6 @@ def main(files, out, time_break):
     """
 
 
-
-
-
-
     fname, ext = os.path.splitext(files)
     if ext in '.nc':
         list_files = [files]
@@ -168,5 +164,5 @@ def main(files, out, time_break):
 
 if __name__ == '__main__':
     times = 'time.month'
-    file = '/Users/knuth/Downloads/deployment0000_RS01SBPS-SF01A-2A-CTDPFA102-streamed-ctdpf_sbe43_sample_20161010T120000.136094-20161010T160100.317451.nc'
-    main(file, '/Users/knuth/Desktop/devel', times)
+    file = 'http://opendap.oceanobservatories.org:80/thredds/dodsC/ooi/friedrich-knuth-gmail/20170223T213020-RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20161231T120000.390248-20170223T210000.796904.nc'
+    main(file, '/Users/knuth/Desktop/ctd', times)
