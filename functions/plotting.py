@@ -59,7 +59,7 @@ def add_global_ranges(ax, data):
     return global_ranges
 
 
-def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color='midnightblue'):
+def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color=None):
     """
     :param x: x data
     :type x: dictionary
@@ -80,7 +80,7 @@ def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color='mid
         if np.isnan(y['data']).all():
             fig, ax = nan_plot(title)
         else:
-            fig, ax = plot(x, y, title, stdev, line_style, g_range)
+            fig, ax = plot(x, y, title, stdev, line_style, g_range, color)
     else:
         fig, ax = multilines(x, y, title)
     return fig, ax
@@ -214,7 +214,7 @@ def nan_plot(title):
     return fig, ax
 
 
-def plot(x, y, title, stdev = None, line_style='.', g_ranges=False, color='midnightblue'):
+def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None):
     """
 
     :param x: Dictionary must be in the form:
@@ -245,7 +245,7 @@ def plot(x, y, title, stdev = None, line_style='.', g_ranges=False, color='midni
     fig, ax = plt.subplots()
     # ax.set_autoscale_on(False)
     plt.grid()
-    plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=1)
+    plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=1, color=color)
 
     ax.set_title(title)
 

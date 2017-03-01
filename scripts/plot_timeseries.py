@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, stdev=None, time_break='full'):
+def main(files, out, stdev=None, color=None, time_break='full'):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -107,7 +107,7 @@ def main(files, out, stdev=None, time_break='full'):
                     title = title_pre + var
 
                     # plot timeseries with outliers
-                    fig, ax = pf.auto_plot(x, y, title, stdev=None, line_style='r-o', g_range=True)
+                    fig, ax = pf.auto_plot(x, y, title, stdev=None, line_style='.', g_range=True, color=color)
                     pf.resize(width=12, height=8.5)  # Resize figure
 
                     save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
@@ -115,7 +115,7 @@ def main(files, out, stdev=None, time_break='full'):
                     plt.close('all')
 
                     # plot timeseries with outliers removed
-                    fig, ax = pf.auto_plot(x, y, title, stdev=stdev, line_style='r-o', g_range=True)
+                    fig, ax = pf.auto_plot(x, y, title, stdev=stdev, line_style='.', g_range=True, color=color)
                     pf.resize(width=12, height=8.5)  # Resize figure
 
                     save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
@@ -125,7 +125,8 @@ def main(files, out, stdev=None, time_break='full'):
 
 if __name__ == '__main__':
     times = 'time.month' # set times = 'full' to plot entire dataset
-    stdev = 1
+    stdev = None # specify sigma or leave as None. If None a second plot with outliers removed will not be created.
+    color = None # specifes plot color. defaults to royal blue if left at None. go here for more colors http://matplotlib.org/examples/color/named_colors.html
     file = '/Users/knuth/Desktop/CTDPFA302/deployment1/deployment0001_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20141007T213253.601810-20150222T115959.596701.nc'
-    main(file, '/Users/knuth/Desktop/adcp/timeseries', stdev, times)
+    main(file, '/Users/knuth/Desktop/adcp/timeseries', stdev, color, times)
 
