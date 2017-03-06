@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, time_break, depth):
+def main(files, out, time_break, depth, start, end):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -64,7 +64,8 @@ def main(files, out, time_break, depth):
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'xsection_depth_profiles')
+            save_dir = os.path.join(out,'xsection_depth_profiles')
+            # save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'xsection_depth_profiles')
             cf.create_dir(save_dir)
 
             # try:
@@ -85,12 +86,58 @@ def main(files, out, time_break, depth):
             # tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
             # time_list = [[t0, t1], [t0, tI], [tI, t1]]
 
-            times = np.unique(ds[time_break])
+            if not time_break == None:
+                times = np.unique(ds[time_break])
             
-            for t in times:
-                time_ind = t == ds[time_break].data
+                for t in times:
+                    time_ind = t == ds[time_break].data
+                    for var in sci_vars:
+                        x = dict(data=ds['time'].data[time_ind],
+                                 info=dict(label='Time', units='GMT'))
+                        t0 = pd.to_datetime(x['data'].min()).strftime('%Y-%m-%dT%H%M%00')
+                        t1 = pd.to_datetime(x['data'].max()).strftime('%Y-%m-%dT%H%M%00')
+                        try:
+                            sci = ds[var]
+                            print var
+                            # sci = sub_ds[var]
+                        except UnicodeEncodeError: # some comments have latex characters
+                            ds[var].attrs.pop('comment')  # remove from the attributes
+                            sci = ds[var]  # or else the variable won't load
+
+
+                        y = dict(data=ds[depth].data[time_ind], info=dict(label='Pressure', units='dbar', var=var,
+                                                                    platform=platform, node=node, sensor=sensor))
+
+                        
+                        try:
+                            z_lab = sci.long_name
+                        except AttributeError:
+                            z_lab = sci.standard_name
+                        z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=sci.units, var=var,
+                                                                    platform=platform, node=node, sensor=sensor))
+
+                        title = title_pre + var
+
+                        # plot timeseries with outliers
+                        fig, ax = pf.depth_cross_section(x, y, z, title=title)
+                        pf.resize(width=12, height=8.5)  # Resize figure
+
+                        save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
+                        pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                        plt.close('all')
+                        # try:
+                        #     y_lab = sci.standard_name
+                        # except AttributeError:
+                        #     y_lab = var
+                        # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
+
+                    del x, y
+
+            else:
+                ds = ds.sel(time=slice(start, end))
+
                 for var in sci_vars:
-                    x = dict(data=ds['time'].data[time_ind],
+                    x = dict(data=ds['time'].data[:],
                              info=dict(label='Time', units='GMT'))
                     t0 = pd.to_datetime(x['data'].min()).strftime('%Y-%m-%dT%H%M%00')
                     t1 = pd.to_datetime(x['data'].max()).strftime('%Y-%m-%dT%H%M%00')
@@ -103,15 +150,15 @@ def main(files, out, time_break, depth):
                         sci = ds[var]  # or else the variable won't load
 
 
-                    y = dict(data=ds[depth].data[time_ind], info=dict(label='Pressure', units='dbar', var=var,
+                    y = dict(data=ds[depth].data[:], info=dict(label='Pressure', units='dbar', var=var,
                                                                 platform=platform, node=node, sensor=sensor))
 
-                    
+
                     try:
                         z_lab = sci.long_name
                     except AttributeError:
                         z_lab = sci.standard_name
-                    z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=sci.units, var=var,
+                    z = dict(data=sci.data[:], info=dict(label=z_lab, units=sci.units, var=var,
                                                                 platform=platform, node=node, sensor=sensor))
 
                     title = title_pre + var
@@ -132,8 +179,11 @@ def main(files, out, time_break, depth):
                 del x, y
 
 if __name__ == '__main__':
+    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment3/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160714T211800.492217-20161008T115959.708545.nc'
+    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment3/plots_test'
     depth = 'seawater_pressure'
-    times = 'time.month'
-    file = '/Users/knuth/Desktop/CTDPFA302/deployment0001_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20150701T110002.425051-20150708T190645.135262.nc'
-    main(file, '/Users/knuth/Desktop/CTDPFA302/plots', times, depth)
+    times = None # example: 'time.month' Must be None to set interval between start_time and end_time
+    start_time = '2016-09-13'
+    end_time = '2016-09-17'
+    main(nc_file, output_location, times, depth, start_time, end_time)
 
