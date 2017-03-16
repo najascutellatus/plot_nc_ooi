@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, time_break, depth, start, end):
+def main(files, out, time_break, depth, start, end, interactive):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -74,7 +74,7 @@ def main(files, out, time_break, depth, start, end):
             #     eng = ['']
 
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
-            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm']
+            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm', 'light']
 
             # reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
             reg_ex = re.compile('|'.join(misc))
@@ -131,7 +131,7 @@ def main(files, out, time_break, depth, start, end):
                         #     y_lab = var
                         # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
-                    del x, y
+                    # del x, y
 
             else:
                 ds = ds.sel(time=slice(start, end))
@@ -164,26 +164,32 @@ def main(files, out, time_break, depth, start, end):
                     title = title_pre + var
 
                     # plot timeseries with outliers
-                    fig, ax = pf.depth_cross_section(x, y, z, title=title)
-                    pf.resize(width=12, height=8.5)  # Resize figure
+                    fig, ax = pf.depth_cross_section(x, y, z, title=title, interactive=interactive)
 
-                    save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
-                    pf.save_fig(save_dir, save_name, res=150)  # Save figure
-                    plt.close('all')
+                    if interactive == True:
+                        fig.canvas.mpl_connect('pick_event', lambda event: pf.onpick3(event, x['data'], y['data'], z['data']))
+                        plt.show()
+
+                    else:
+                        pf.resize(width=12, height=8.5)  # Resize figure
+                        save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
+                        pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                        plt.close('all')
                     # try:
                     #     y_lab = sci.standard_name
                     # except AttributeError:
                     #     y_lab = var
                     # y = dict(data=sci.data, info=dict(label=y_lab, units=sci.units))
 
-                del x, y
+                # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment3/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160714T211800.492217-20161008T115959.708545.nc'
-    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment3/plots_test'
-    depth = 'seawater_pressure'
+    nc_file = '/Users/knuth/Desktop/PCO2WA301/deployment3/deployment0003_RS03AXPS-SF03A-4F-PCO2WA301-streamed-pco2w_a_sami_data_record_20160714T220510.338788-20161201T064210.693177.nc'
+    output_location = '/Users/knuth/Desktop/PCO2WA301/deployment3/plots_year_test'
+    depth = 'ctdpf_sbe43_sample-seawater_pressure'
     times = None # example: 'time.month' Must be None to set interval between start_time and end_time
     start_time = '2016-09-13'
     end_time = '2016-09-17'
-    main(nc_file, output_location, times, depth, start_time, end_time)
+    interactive = True # set to True to create interactive plots, instead of saving plots to file.
+    main(nc_file, output_location, times, depth, start_time, end_time, interactive)
 

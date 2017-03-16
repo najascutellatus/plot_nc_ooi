@@ -122,7 +122,6 @@ def compare_timeseries(t1, y1, t2, y2, g_range=False):
     return fig, ax
 
 
-def depth_cross_section(x, y, z, s=2, title=None):
     fig, ax = plt.subplots()
     plt.grid()
 
@@ -131,7 +130,6 @@ def depth_cross_section(x, y, z, s=2, title=None):
     sc = plt.scatter(x['data'], y['data'],
                      s=s,
                      c=z['data'],
-                     edgecolors='face')
                      # vmin=)
 
     # add colorbar
@@ -160,8 +158,7 @@ def format_axes(ax, x_data=None, y_data=None):
     xax.scaled = {
         365.0 : '%Y-%M', # data longer than a year
         30.   : '%Y-%m\n%d', # set the > 1m < 1Y scale to Y-m
-        1.0   : '%m/%d', # set the > 1d < 1m scale to Y-m-d
-        1./24.: '%m/%d', # set the < 1d scale to H:M
+        1.0   : '%m/%d\n%H', # set the > 1d < 1m scale to Y-m-d
         1./48.: '%m-%d\n%H:%M:%S',
     }
 
@@ -213,6 +210,9 @@ def nan_plot(title):
     ax.set_title(title)
     return fig, ax
 
+def onpick3(event, x, y, z):
+    ind = event.ind
+    print('onpick3 scatter:', ind, np.take(x, ind), np.take(y, ind), np.take(z, ind))
 
 def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None):
     """
@@ -245,7 +245,6 @@ def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None):
     fig, ax = plt.subplots()
     # ax.set_autoscale_on(False)
     plt.grid()
-    plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=1, color=color)
 
     ax.set_title(title)
 
