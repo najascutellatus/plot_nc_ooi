@@ -140,28 +140,20 @@ def main(files, out, time_break, depth, start, end, interactive):
                     # del x, y
 
             else:
-                # this try statement gets around specifying a slice start or end time outside the bounds of the dataset.
-                print start, end
-                end_last = pd.to_datetime(ds['time'].data[:].max()).strftime('%Y-%m-%dT%H')
-                start_first = pd.to_datetime(ds['time'].data[:].min()).strftime('%Y-%m-%dT%H')
+                ds = ds.sel(time=slice(start, end))
 
-                print end_last, start_first
-                ds = ds.sel(time=slice(start, end)) 
-
-
+                # # TODO this try statement gets around specifying a slice start or end time outside the bounds of the dataset.
                 # try:
                 #     ds = ds.sel(time=slice(start, end))
                 # except:
-                    # end = pd.to_datetime(ds['time'].min()).strftime('%Y-%m-%dT%H:%M:%S')
-                    # end_last = pd.to_datetime(ds['time'].data[:].max()).strftime('%Y-%m-%dT%H')
-                    # start_first = pd.to_datetime(ds['time'].data[:].min()).strftime('%Y-%m-%dT%H')
-                    # print end_last
+                #     end_last = pd.to_datetime(ds['time'].data[:].max()).strftime('%Y-%m-%dT%H')
+                #     start_first = pd.to_datetime(ds['time'].data[:].min()).strftime('%Y-%m-%dT%H')
 
-                    # if end > end_last:
-                    #     ds = ds.sel(time=slice(start, end_last))
+                #     if end > end_last:
+                #         ds = ds.sel(time=slice(start, end_last))
 
-                    # elif start < start_first:
-                    #     ds = ds.sel(time=slice(start_first, end))
+                #     elif start < start_first:
+                #         ds = ds.sel(time=slice(start_first, end))
 
 
                 for var in sci_vars:
@@ -216,7 +208,7 @@ if __name__ == '__main__':
     output_location = '/Users/knuth/Desktop/CTDPFA302/deployment1/plots_year_test'
     depth = 'seawater_pressure'
     times = None # example: 'time.month' Must be None to set interval between start_time and end_time
-    start_time = '2015-05-00T00'
+    start_time = '2015-05-01T00'
     end_time = '2015-05-30T00'
     interactive = True # set to True to create interactive plots, instead of saving plots to file.
     main(nc_file, output_location, times, depth, start_time, end_time, interactive)
