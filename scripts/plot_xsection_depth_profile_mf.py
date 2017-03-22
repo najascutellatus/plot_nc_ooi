@@ -130,10 +130,11 @@ def main(nc, directory, out, time_break, depth, breakdown):
             del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment3/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160714T211800.492217-20161008T115959.708545.nc'
+    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment1/data/deployment0001_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20141002T204253.305780-20150105T235959.490062.nc'
     depth = 'seawater_pressure'
     times = 'time.year'
     breakdown = 'by_year'
-    location = '/Users/knuth/Desktop/CTDPFA302/deployment3'
-    main(nc_file, location, '/Users/knuth/Desktop/CTDPFA302/deployment3/plots', times, depth, breakdown)
+    files_location = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data'
+    output_dir = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/plots'
+    main(nc_file, files_location, output_dir, times, depth, breakdown)
 

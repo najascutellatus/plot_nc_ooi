@@ -204,12 +204,12 @@ def main(files, out, time_break, depth, start, end, interactive):
                 # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment1/data/deployment0001_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20150222T120000.596921-20150604T120000.076482.nc'
-    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment1/plots_year_test'
+    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment2/data/deployment0002_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160329T120000.855477-20160630T115959.286519.nc'
+    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment2/plots_year_test'
     depth = 'seawater_pressure'
     times = None # example: 'time.month' Must be None to set interval between start_time and end_time
-    start_time = '2015-05-01T00'
-    end_time = '2015-05-30T00'
+    start_time = '2016-04-19'
+    end_time = '2016-05-08'
     interactive = True # set to True to create interactive plots, instead of saving plots to file.
     main(nc_file, output_location, times, depth, start_time, end_time, interactive)
 
