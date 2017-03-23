@@ -59,7 +59,7 @@ def add_global_ranges(ax, data):
     return global_ranges
 
 
-def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color=None):
+def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color=None, interactive=False):
     """
     :param x: x data
     :type x: dictionary
@@ -80,7 +80,7 @@ def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color=None
         if np.isnan(y['data']).all():
             fig, ax = nan_plot(title)
         else:
-            fig, ax = plot(x, y, title, stdev, line_style, g_range, color)
+            fig, ax = plot(x, y, title, stdev, line_style, g_range, color, interactive)
     else:
         fig, ax = multilines(x, y, title)
     return fig, ax
@@ -168,6 +168,27 @@ def format_axes(ax, x_data=None, y_data=None):
     y_formatter = ticker.ScalarFormatter(useOffset=False)
     ax.yaxis.set_major_formatter(y_formatter)
 
+# def line_picker(line, mouseevent):
+#     """
+#     find the points within a certain distance from the mouseclick in
+#     data coords and attach some extra attributes, pickx and picky
+#     which are the data points that were picked
+#     """
+#     if mouseevent.xdata is None:
+#         return False, dict()
+#     xdata = line.get_xdata()
+#     ydata = line.get_ydata()
+#     maxd = 0.05
+#     d = np.sqrt((xdata - mouseevent.xdata)**2. + (ydata - mouseevent.ydata)**2.)
+
+#     ind = np.nonzero(np.less_equal(d, maxd))
+#     if len(ind):
+#         pickx = np.take(xdata, ind)
+#         picky = np.take(ydata, ind)
+#         props = dict(ind=ind, pickx=pickx, picky=picky)
+#         return True, props
+#     else:
+#         return False, dict()
 
 def load_variable_dict(var='eng'):
     """
@@ -217,10 +238,13 @@ def onpick3(event, x, y, z):
     ind = event.ind
     print('onpick3 scatter:', ind, np.take(x, ind), np.take(y, ind), np.take(z, ind))
 
+def onpick2(event, x, y):
+    ind = event.ind
+    print('onpick2 timeseries:', ind, np.take(x, ind), np.take(y, ind))
 
-def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None):
+
+def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None, interactive=False):
     """
-
     :param x: Dictionary must be in the form:
     {'data': numpy data array ,
     'info': {'label': axis label, 'units': axis units'}}
@@ -249,7 +273,10 @@ def plot(x, y, title, stdev=None, line_style='.', g_ranges=False, color=None):
     fig, ax = plt.subplots()
     # ax.set_autoscale_on(False)
     plt.grid()
-    plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=3, color=color)
+    if not interactive == True:
+        plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=3, color=color)
+    else:
+        plt.plot(x['data'], y['data'], line_style, linewidth=1, markersize=3, color=color, picker=True)
 
     ax.set_title(title)
 

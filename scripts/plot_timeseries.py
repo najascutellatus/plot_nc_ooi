@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, stdev=None, color=None, time_break='full'):
+def main(files, out, start, end, time_break='full', stdev=None, color=None, interactive=False):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -62,7 +62,7 @@ def main(files, out, stdev=None, color=None, time_break='full'):
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'timeseries')
+            save_dir = os.path.join(out,'timeseries')
             cf.create_dir(save_dir)
 
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
@@ -74,19 +74,61 @@ def main(files, out, stdev=None, color=None, time_break='full'):
             #  keep variables that are not in the regular expression
             sci_vars = [s for s in ds_variables if not reg_ex.search(s)]
 
-            if not time_break is 'full':
-                times = np.unique(ds[time_break])
-            else:
-                times = [0]
-            
-            for t in times:
-                if not time_break is 'full':
-                    time_ind = t == ds[time_break].data
-                else:
-                    time_ind = np.ones(ds['time'].data.shape, dtype=bool) # index all times to be set to True
+            # if not time_break is 'full' and not None:
+            #     times = np.unique(ds[time_break])
+            # else:
+            #     times = [0]
 
+            if not time_break == None:
+                times = np.unique(ds[time_break])
+                for t in times:
+                    if not time_break is 'full':
+                        time_ind = t == ds[time_break].data
+                    else:
+                        time_ind = np.ones(ds['time'].data.shape, dtype=bool) # index all times to be set to True
+
+                    for var in sci_vars:
+                        x = dict(data=ds['time'].data[time_ind],
+                                 info=dict(label='Time', units='GMT'))
+                        t0 = pd.to_datetime(x['data'].min()).strftime('%Y-%m-%dT%H%M%00')
+                        t1 = pd.to_datetime(x['data'].max()).strftime('%Y-%m-%dT%H%M%00')
+                        try:
+                            sci = ds[var]
+                            print var
+                        except UnicodeEncodeError: # some comments have latex characters
+                            ds[var].attrs.pop('comment')  # remove from the attributes
+                            sci = ds[var]  # or else the variable won't load
+
+                        try:
+                            y_lab = sci.long_name
+                        except AttributeError:
+                            y_lab = sci.standard_name
+                        y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
+                                                                    platform=platform, node=node, sensor=sensor))
+
+                        title = title_pre + var
+
+                        # plot timeseries with outliers
+                        fig, ax = pf.auto_plot(x, y, title, stdev=None, line_style='.', g_range=True, color=color)
+                        pf.resize(width=12, height=8.5)  # Resize figure
+
+                        save_name = '{}-{}-{}_{}_{}-{}'.format(platform, node, sensor, var, t0, t1)
+                        pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                        plt.close('all')
+
+                        # plot timeseries with outliers removed
+                        fig, ax = pf.auto_plot(x, y, title, stdev=stdev, line_style='.', g_range=True, color=color)
+                        pf.resize(width=12, height=8.5)  # Resize figure
+
+                        save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
+                        pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                        plt.close('all')
+                    # del x, y
+
+            else:
+                ds = ds.sel(time=slice(start, end))
                 for var in sci_vars:
-                    x = dict(data=ds['time'].data[time_ind],
+                    x = dict(data=ds['time'].data[:],
                              info=dict(label='Time', units='GMT'))
                     t0 = pd.to_datetime(x['data'].min()).strftime('%Y-%m-%dT%H%M%00')
                     t1 = pd.to_datetime(x['data'].max()).strftime('%Y-%m-%dT%H%M%00')
@@ -101,7 +143,7 @@ def main(files, out, stdev=None, color=None, time_break='full'):
                         y_lab = sci.long_name
                     except AttributeError:
                         y_lab = sci.standard_name
-                    y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
+                    y = dict(data=sci.data[:], info=dict(label=y_lab, units=sci.units, var=var,
                                                                 platform=platform, node=node, sensor=sensor))
 
                     title = title_pre + var
@@ -115,18 +157,27 @@ def main(files, out, stdev=None, color=None, time_break='full'):
                     plt.close('all')
 
                     # plot timeseries with outliers removed
-                    fig, ax = pf.auto_plot(x, y, title, stdev=stdev, line_style='.', g_range=True, color=color)
-                    pf.resize(width=12, height=8.5)  # Resize figure
+                    fig, ax = pf.auto_plot(x, y, title, stdev=stdev, line_style='.', g_range=True, color=color, interactive=interactive)
+                    if interactive == True:
+                        fig.canvas.mpl_connect('pick_event', lambda event: pf.onpick2(event, x['data'], y['data']))
+                        plt.show()
+                    
+                    else:
+                        pf.resize(width=12, height=8.5)  # Resize figure
+                        save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
+                        pf.save_fig(save_dir, save_name, res=150)  # Save figure
+                        plt.close('all')
 
-                    save_name = '{}-{}-{}_{}_{}-{}_outliers_removed'.format(platform, node, sensor, var, t0, t1)
-                    pf.save_fig(save_dir, save_name, res=150)  # Save figure
-                    plt.close('all')
-                del x, y
+                # del x, y
 
 if __name__ == '__main__':
-    times = 'time.month' # set times = 'full' to plot entire dataset
+    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment2/data/deployment0002_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160630T120000.285798-20160713T022301.486787.nc'
+    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment2/plots_year_test'
+    start_time = '2016-07-01'
+    end_time = '2016-07-13'
+    interactive = False
+    times = None # set times = 'full' to plot entire dataset. Or 'time.month' 'time.year'. Must be None to set interval between start_time and end_time
     stdev = None # specify sigma or leave as None. If None a second plot with outliers removed will not be created.
     color = None # specifes plot color. defaults to royal blue if left at None. go here for more colors http://matplotlib.org/examples/color/named_colors.html
-    file = '/Users/knuth/Desktop/CTDPFA302/deployment1/deployment0001_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20141007T213253.601810-20150222T115959.596701.nc'
-    main(file, '/Users/knuth/Desktop/adcp/timeseries', stdev, color, times)
+    main(nc_file, output_location, start_time, end_time, times, stdev, color, interactive)
 
