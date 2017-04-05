@@ -13,7 +13,7 @@ import re
 import numpy as np
 import os
 
-tools = 'pan,zoom_in,zoom_out,wheel_zoom,box_zoom,reset,hover'
+tools = 'pan,zoom_in,zoom_out,wheel_zoom,box_zoom,reset,hover,save'
 
 
 def main(nc, save_dir, display=False):
