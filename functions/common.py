@@ -3,9 +3,24 @@ import datetime as dt
 import pandas as pd
 import requests
 import numpy as np
+import time
 
 requests.packages.urllib3.disable_warnings()
 
+
+def timing_function(some_function):
+
+    """
+    Outputs the time a function takes
+    to execute.
+    """
+
+    def wrapper():
+        t1 = time.time()
+        some_function()
+        t2 = time.time()
+        return "Time it took to run the function: " + str((t2 - t1)) + "\n"
+    return wrapper
 
 
 def create_dir(new_dir):
@@ -94,12 +109,12 @@ def get_global_ranges(platform, node, sensor, variable, api_user=None, api_token
                     local_min = float(t2[t2['qcParameterPK.parameter'] == 'dat_min'].iloc[0]['value'])
                     local_max = float(t2[t2['qcParameterPK.parameter'] == 'dat_max'].iloc[0]['value'])
                 else:
-                    local_min = 'N/A'
-                    local_max = 'N/A'
+                    local_min = None
+                    local_max = None
             else:
-                local_min = 'N/A'
-                local_max = 'N/A'
+                local_min = None
+                local_max = None
         else:
-            local_min = 'N/A'
-            local_max = 'N/A'
+            local_min = None
+            local_max = None
     return [local_min, local_max]
