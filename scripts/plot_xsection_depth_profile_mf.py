@@ -109,7 +109,7 @@ def main(nc, directory, out, time_break, depth, breakdown):
                     z_lab = sci.long_name
                 except AttributeError:
                     z_lab = sci.standard_name
-                z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=sci.units, var=var,
+                z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=str(sci.units), var=var,
                                                             platform=platform, node=node, sensor=sensor))
 
                 title = title_pre + var
@@ -130,11 +130,11 @@ def main(nc, directory, out, time_break, depth, breakdown):
             del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment1/data/deployment0001_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20141002T204253.305780-20150105T235959.490062.nc'
+    nc_file = '/Users/knuth/Downloads/deployment0001_CE04OSBP-LJ01C-06-CTDBPO108-streamed-ctdbp_no_sample_20140825T185041.536634-20141031T235959.989535.nc'
     depth = 'seawater_pressure'
     times = 'time.year'
     breakdown = 'by_year'
-    files_location = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data'
-    output_dir = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/plots'
+    files_location = '/Users/knuth/Desktop/data_review/RS01SBPS/RS01SBPS-SF01A-2A-CTDPFA102/deployment3/data'
+    output_dir = '/Users/knuth/Desktop/data_review/RS01SBPS/RS01SBPS-SF01A-2A-CTDPFA102/deployment3/plots'
     main(nc_file, files_location, output_dir, times, depth, breakdown)
 

@@ -168,27 +168,6 @@ def format_axes(ax, x_data=None, y_data=None):
     y_formatter = ticker.ScalarFormatter(useOffset=False)
     ax.yaxis.set_major_formatter(y_formatter)
 
-# def line_picker(line, mouseevent):
-#     """
-#     find the points within a certain distance from the mouseclick in
-#     data coords and attach some extra attributes, pickx and picky
-#     which are the data points that were picked
-#     """
-#     if mouseevent.xdata is None:
-#         return False, dict()
-#     xdata = line.get_xdata()
-#     ydata = line.get_ydata()
-#     maxd = 0.05
-#     d = np.sqrt((xdata - mouseevent.xdata)**2. + (ydata - mouseevent.ydata)**2.)
-
-#     ind = np.nonzero(np.less_equal(d, maxd))
-#     if len(ind):
-#         pickx = np.take(xdata, ind)
-#         picky = np.take(ydata, ind)
-#         props = dict(ind=ind, pickx=pickx, picky=picky)
-#         return True, props
-#     else:
-#         return False, dict()
 
 def load_variable_dict(var='eng'):
     """

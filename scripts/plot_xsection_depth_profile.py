@@ -113,7 +113,7 @@ def main(files, out, time_break, depth, start, end, interactive):
                             z_lab = sci.long_name
                         except AttributeError:
                             z_lab = sci.standard_name
-                        z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=sci.units, var=var,
+                        z = dict(data=sci.data[time_ind], info=dict(label=z_lab, units=str(sci.units), var=var,
                                                                     platform=platform, node=node, sensor=sensor))
 
                         title = title_pre + var
@@ -204,12 +204,12 @@ def main(files, out, time_break, depth, start, end, interactive):
                 # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/CTDPFA302/deployment2/data/deployment0002_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160329T120000.855477-20160630T115959.286519.nc'
-    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment2/plots_year_test'
+    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment3/data/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20161231T120000.390248-20170227T195957.252333.nc'
+    output_location = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment3/plots'
     depth = 'seawater_pressure'
     times = None # example: 'time.month' Must be None to set interval between start_time and end_time
-    start_time = '2016-04-19'
-    end_time = '2016-05-08'
+    start_time = '2017-01-10'
+    end_time = '2017-01-20'
     interactive = True # set to True to create interactive plots, instead of saving plots to file.
     main(nc_file, output_location, times, depth, start_time, end_time, interactive)
 

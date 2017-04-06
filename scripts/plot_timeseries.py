@@ -103,7 +103,7 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
                             y_lab = sci.long_name
                         except AttributeError:
                             y_lab = sci.standard_name
-                        y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
+                        y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=str(sci.units), var=var,
                                                                     platform=platform, node=node, sensor=sensor))
 
                         title = title_pre + var
@@ -171,11 +171,11 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
                 # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment2/data/deployment0002_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20160630T120000.285798-20160713T022301.486787.nc'
+    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data/deployment0002_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20160528T000000.598084-20160713T022259.045170.nc'
     output_location = '/Users/knuth/Desktop/CTDPFA302/deployment2/plots_year_test'
-    start_time = '2016-07-01'
-    end_time = '2016-07-13'
-    interactive = False
+    start_time = '2016-06-01'
+    end_time = '2016-06-20'
+    interactive = True
     times = None # set times = 'full' to plot entire dataset. Or 'time.month' 'time.year'. Must be None to set interval between start_time and end_time
     stdev = None # specify sigma or leave as None. If None a second plot with outliers removed will not be created.
     color = None # specifes plot color. defaults to royal blue if left at None. go here for more colors http://matplotlib.org/examples/color/named_colors.html

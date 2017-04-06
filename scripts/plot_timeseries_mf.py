@@ -44,7 +44,9 @@ def main(nc, directory, out, time_break, breakdown):
     out: Directory to save plots
     """
     list_files = directory + "/*.nc"
-
+    # list_files = ['https://opendap.oceanobservatories.org/thredds/dodsC/ooi/friedrich-knuth-gmail/20170322T191659-RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample/deployment0003_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20170312T000000.426102-20170322T190000.059973.nc',
+    # 'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/friedrich-knuth-gmail/20170322T191659-RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample/deployment0003_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20161222T000000.132709-20170311T235959.426096.nc']
+    # print list_files
     stream_vars = pf.load_variable_dict(var='eng')  # load engineering variables
 
     with xr.open_dataset(nc, mask_and_scale=False) as ds_ncfile:
@@ -103,7 +105,7 @@ def main(nc, directory, out, time_break, breakdown):
                     y_lab = sci.long_name
                 except AttributeError:
                     y_lab = sci.standard_name
-                y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=sci.units, var=var,
+                y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=str(sci.units), var=var,
                                                             platform=platform, node=node, sensor=sensor))
 
                 title = title_pre + var
@@ -130,10 +132,10 @@ def main(nc, directory, out, time_break, breakdown):
                 # plt.close('all')
             del x, y
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment1/data/deployment0001_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20141002T204253.305780-20150105T235959.490062.nc'
+    nc_file = '/Users/knuth/Downloads/d2/deployment0002_CE04OSBP-LJ01C-06-CTDBPO108-streamed-ctdbp_no_sample_20150803T231918.079541-20150916T235959.611749.nc'
     times = 'time.year'
     breakdown = 'by_year'
-    files_location = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data'
-    output_dir = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/plots'
+    files_location = '/Users/knuth/Downloads/d2'
+    output_dir = '/Users/knuth/Downloads/d2'
     main(nc_file, files_location, output_dir, times, breakdown)
 
