@@ -90,6 +90,6 @@ def main(nc, save_dir, display=False):
 
 if __name__ == '__main__':
     file_name = 'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/michaesm-marine-rutgers/20170317T160317-CE09OSSM-RID26-07-NUTNRB000-recovered_inst-nutnr_b_instrument_recovered/deployment0001_CE09OSSM-RID26-07-NUTNRB000-recovered_inst-nutnr_b_instrument_recovered_20150409T160033-20150525T210043.nc'
-    save = '/Users/mikesmith/Documents/plots'
-    display = True #set to True to display plots in browser as they are created
-    main(file_name, save, display)
+    save_dir = '/Users/knuth/Desktop/test'
+    display = False #set to True to display plots in browser as they are created
+    main(file_name, save_dir, display)
