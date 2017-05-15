@@ -3,7 +3,8 @@ from thredds_crawler.crawl import Crawl
 import click as click
 import datetime as dt
 import os
-import plotting.plot_functions as pf 
+import functions.common as cf
+
 
 @click.command()
 @click.argument('url', nargs=1, type=click.Path())
@@ -11,8 +12,8 @@ import plotting.plot_functions as pf
 def main(url, out):
     now = dt.datetime.now().strftime('%Y.%m.%dT%H.%M.00')
     C = Crawl(url, select=[".*ncml"])
-    tds = 'http://opendap.oceanobservatories.org/thredds/dodsC/'
-    pf.create_dir(out)
+    tds = 'https://opendap.oceanobservatories.org/thredds/dodsC/'
+    cf.create_dir(out)
     fopen = open(out+ '/' + now+'-nc-links.txt', 'w')
 
     for dataset in C.datasets:
