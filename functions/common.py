@@ -117,4 +117,7 @@ def get_global_ranges(platform, node, sensor, variable, api_user=None, api_token
         else:
             local_min = None
             local_max = None
+    else:
+        local_min = None
+        local_max = None
     return [local_min, local_max]

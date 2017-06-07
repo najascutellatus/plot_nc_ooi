@@ -27,7 +27,7 @@ def main(nc, save_dir, display=False):
         deployment = 'D0000{}'.format(str(np.unique(ds.deployment)[0]))
         t0 = ds.time_coverage_start
         t1 = ds.time_coverage_end
-        sub_dir = os.path.join(save_dir, subsite, deployment, node, sensor, stream)
+        sub_dir = os.path.join(save_dir, subsite, '{}-{}-{}'.format(subsite, node, sensor), stream, deployment)
 
         cf.create_dir(sub_dir)
 
@@ -89,7 +89,15 @@ def main(nc, save_dir, display=False):
             reset_output()
 
 if __name__ == '__main__':
-    file_name = 'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/michaesm-marine-rutgers/20170317T160317-CE09OSSM-RID26-07-NUTNRB000-recovered_inst-nutnr_b_instrument_recovered/deployment0001_CE09OSSM-RID26-07-NUTNRB000-recovered_inst-nutnr_b_instrument_recovered_20150409T160033-20150525T210043.nc'
-    save_dir = '/Users/knuth/Desktop/test'
+    files = ['https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0001_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0002_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0003_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0004_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0005_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0006_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml',
+             'https://opendap.oceanobservatories.org/thredds/dodsC/ooi/m.smith3887@gmail.com/20170511T153726-CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument/deployment0007_CE09OSPM-WFP01-03-CTDPFK000-telemetered-ctdpf_ckl_wfp_instrument.ncml']
+
+    save_dir = '/Users/mikesmith/Documents/'
     display = False #set to True to display plots in browser as they are created
-    main(file_name, save_dir, display)
+    for f in files:
+        main(f, save_dir, display)

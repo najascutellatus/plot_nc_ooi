@@ -70,6 +70,7 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
             'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm','description']
 
+
             # reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
             reg_ex = re.compile('|'.join(misc))
 

@@ -77,10 +77,14 @@ def auto_plot(x, y, title, stdev=None, line_style='.', g_range=False, color=None
     y_shape = y['data'].shape
 
     if len(y_shape) is 1:
-        if np.isnan(y['data']).all():
-            fig, ax = nan_plot(title)
-        else:
-            fig, ax = plot(x, y, title, stdev, line_style, g_range, color, interactive)
+        try:
+            if np.isnan(y['data']).all():
+                fig, ax = nan_plot(title)
+            else:
+                fig, ax = plot(x, y, title, stdev, line_style, g_range, color, interactive)
+        except TypeError:
+            pass
+
     else:
         fig, ax = multilines(x, y, title)
     return fig, ax
@@ -127,7 +131,40 @@ def depth_cross_section(x, y, z, s=5, title=None, interactive=False):
     plt.grid()
 
     ax.invert_yaxis()
-    # tlim = np.nanpercentile(abs(z['data']), 95)
+    sc = plt.scatter(x['data'], y['data'],
+                     s=s,
+                     c=z['data'],
+                     edgecolors='face', picker=interactive)
+
+    # add colorbar
+    cb = fig.colorbar(sc, ax=ax, label=z['info']['label'] + " (" + z['info']['units'] + ")")
+    cb.formatter.set_useOffset(False)
+    cb.update_ticks()
+
+    ax.set_title(title)
+    format_axes(ax, x_data=x['data'])
+    set_labels(ax, x['info'], y['info'])
+    return fig, ax
+
+
+def depth_glider_cross_section(x, y, z, s=5, title=None, stdev=3, interactive=False):
+    fig, ax = plt.subplots()
+    plt.grid()
+
+
+    # remove measurements at the surface
+    ind = y['data'] > 5 # meters (dbar) to exclude
+    y['data'] = y['data'][ind]
+    x['data'] = x['data'][ind]
+    z['data'] = z['data'][ind]
+
+    # remove stdev of z values
+    ind = reject_outliers(z['data'], stdev)
+    y['data'] = y['data'][ind]
+    x['data'] = x['data'][ind]
+    z['data'] = z['data'][ind]
+
+    ax.invert_yaxis()
     sc = plt.scatter(x['data'], y['data'],
                      s=s,
                      c=z['data'],
@@ -138,6 +175,7 @@ def depth_cross_section(x, y, z, s=5, title=None, interactive=False):
     cb = fig.colorbar(sc, ax=ax, label=z['info']['label'] + " (" + z['info']['units'] + ")")
     cb.formatter.set_useOffset(False)
     cb.update_ticks()
+
 
     ax.set_title(title)
     format_axes(ax, x_data=x['data'])
