@@ -38,7 +38,7 @@ def read_file(fname):
     return file_list
 
 
-def main(files, out, time_break, depth, start, end, interactive):
+def main(files, out, depth, start, end, time_break='full', stdev=None, color=None, interactive=False): #main(files, out, time_break, depth, start, end, interactive):
     """
     files: url to an .nc/.ncml file or the path to a text file containing .nc/.ncml links. A # at the front will skip links in the text file.
     out: Directory to save plots
@@ -64,7 +64,9 @@ def main(files, out, time_break, depth, start, end, interactive):
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out,'xsection_depth_profiles')
+            deployment = 'D0000{}'.format(str(np.unique(ds.deployment)[0]))
+            stream = ds.stream
+            save_dir = os.path.join(out,platform, deployment, node, sensor, stream, 'xsection_depth_profiles')
             # save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'xsection_depth_profiles')
             cf.create_dir(save_dir)
 
@@ -74,7 +76,7 @@ def main(files, out, time_break, depth, start, end, interactive):
             #     eng = ['']
 
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
-            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm', 'light']
+            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm', 'light','description']
 
             # reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
             reg_ex = re.compile('|'.join(misc))
@@ -120,6 +122,8 @@ def main(files, out, time_break, depth, start, end, interactive):
 
                         # plot timeseries with outliers
                         fig, ax = pf.depth_cross_section(x, y, z, title=title)
+
+
 
                         if interactive == True:
                             fig.canvas.mpl_connect('pick_event', lambda event: pf.onpick3(event, x['data'], y['data'], z['data']))
@@ -204,12 +208,23 @@ def main(files, out, time_break, depth, start, end, interactive):
                 # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment3/data/deployment0003_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20161231T120000.390248-20170227T195957.252333.nc'
-    output_location = '/Users/knuth/Desktop/data_review/RS03AXPS-SF03A-2A-CTDPFA302/deployment3/plots'
-    depth = 'seawater_pressure'
-    times = None # example: 'time.month' Must be None to set interval between start_time and end_time
-    start_time = '2017-01-10'
-    end_time = '2017-01-20'
-    interactive = True # set to True to create interactive plots, instead of saving plots to file.
-    main(nc_file, output_location, times, depth, start_time, end_time, interactive)
+    nc_file = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.05T11.44.00-CP02PMUI-WFP01-01-VEL3DK000-recovered_wfp-vel3d_k_wfp_instrument-nc-links.txt'
+        #'/Users/leila/Downloads/deployment0004_GP03FLMB-RIM01-02-CTDMOG067-telemetered-ctdmo_ghqr_sio_mule_instrument_20161008T080001-20161205T200001.nc'
+    output_location = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/'
+    depth = 'ctdpf_ckl_wfp_instrument_recovered-ctdpf_ckl_seawater_pressure'
+    #'ctdpf_ckl_wfp_instrument-ctdpf_ckl_seawater_pressure'
+    #'pressure'
+    #'ctdmo_seawater_pressure'
+    #'ctdpf_ckl_wfp_instrument_recovered-ctdpf_ckl_seawater_pressure'
+    #'ctdpf_ckl_wfp_instrument-ctdpf_ckl_seawater_pressure'
+    #'ctdpf_ckl_wfp_instrument_recovered-ctdpf_ckl_seawater_pressure'
+    #'ctdpf_ckl_seawater_pressure'
+    #'sci_water_pressure_dbar'
 
+    # start_time = '2013-01-01'
+    # end_time = '2017-05-21'
+    times = None # example: 'time.month' Must be None to set interval between start_time and end_time
+    stdev = None   # specify sigma or leave as None. If None a second plot with outliers removed will not be created.
+    color = None # specifes plot color. defaults to royal blue if left at None. go here for more colors http://matplotlib.org/examples/color/named_colors.html
+    interactive = False #True # set to True to create interactive plots, instead of saving plots to file.
+    main(nc_file, output_location,  depth,times, stdev, color, interactive) #start_time, end_time,
