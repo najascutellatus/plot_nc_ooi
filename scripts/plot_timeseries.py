@@ -62,11 +62,13 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out,'timeseries')
+            deployment = 'D0000{}'.format(str(np.unique(ds.deployment)[0]))
+            stream = ds.stream
+            save_dir = os.path.join(out, platform, deployment, node, sensor, stream,'timeseries')
             cf.create_dir(save_dir)
 
             misc = ['quality', 'string', 'timestamp', 'deployment', 'id', 'provenance', 'qc',  'time', 'mission', 'obs',
-            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm']
+            'volt', 'ref', 'sig', 'amp', 'rph', 'calphase', 'phase', 'therm','description']
 
             # reg_ex = re.compile('|'.join(eng+misc))  # make regular expression
             reg_ex = re.compile('|'.join(misc))
@@ -102,8 +104,18 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
                         try:
                             y_lab = sci.long_name
                         except AttributeError:
-                            y_lab = sci.standard_name
-                        y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=str(sci.units), var=var,
+                            try:
+                                y_lab = sci.standard_name
+                            except AttributeError:
+                                print 'attribute list is not complete. long_ and standard_ names are not available'
+                                y_lab = var
+                            try:
+                                y_unit = str(sci.units)
+                            except AttributeError:
+                                print 'attribute list is not complete. missing units'
+                                y_unit = 'missing'
+
+                        y = dict(data=sci.data[time_ind], info=dict(label=y_lab, units=y_unit, var=var,
                                                                     platform=platform, node=node, sensor=sensor))
 
                         title = title_pre + var
@@ -142,8 +154,19 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
                     try:
                         y_lab = sci.long_name
                     except AttributeError:
-                        y_lab = sci.standard_name
-                    y = dict(data=sci.data[:], info=dict(label=y_lab, units=sci.units, var=var,
+                        try:
+                            y_lab = sci.standard_name
+                        except AttributeError:
+                            print 'attribute list is not complete. long_ and standard_ names are not available'
+                            y_lab = var
+
+                    try:
+                        y_unit = sci.units
+                    except AttributeError:
+                        print 'attribute list is not complete. units are missing'
+                        y_unit = 'missing'
+
+                    y = dict(data=sci.data[:], info=dict(label=y_lab, units=y_unit, var=var,
                                                                 platform=platform, node=node, sensor=sensor))
 
                     title = title_pre + var
@@ -171,13 +194,15 @@ def main(files, out, start, end, time_break='full', stdev=None, color=None, inte
                 # del x, y
 
 if __name__ == '__main__':
-    nc_file = '/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data/deployment0002_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20160528T000000.598084-20160713T022259.045170.nc'
-    output_location = '/Users/knuth/Desktop/CTDPFA302/deployment2/plots_year_test'
-    start_time = '2016-06-01'
-    end_time = '2016-06-20'
+    nc_file = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.05T11.44.00-CP02PMUI-WFP01-01-VEL3DK000-recovered_wfp-vel3d_k_wfp_instrument-nc-links.txt'
+    #'/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.01T10.28.00CP02PMUI-WFP01-01-VEL3DK000-telemetered-vel3d_k_wfp_stc_instrument-nc-links.txt'
+        #'/Users/knuth/Desktop/data_review/RS03AXPS-PC03A-4A-CTDPFA303/deployment2/data/deployment0002_RS03AXPS-PC03A-4A-CTDPFA303-streamed-ctdpf_optode_sample_20160528T000000.598084-20160713T022259.045170.nc'
+    output_location = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/'
+    #start_time = '2016-06-01'
+    #end_time = '2016-06-20'
     interactive = True
     times = None # set times = 'full' to plot entire dataset. Or 'time.month' 'time.year'. Must be None to set interval between start_time and end_time
     stdev = None # specify sigma or leave as None. If None a second plot with outliers removed will not be created.
     color = None # specifes plot color. defaults to royal blue if left at None. go here for more colors http://matplotlib.org/examples/color/named_colors.html
-    main(nc_file, output_location, start_time, end_time, times, stdev, color, interactive)
+    main(nc_file, output_location, times, stdev, color, interactive) # start_time, end_time,
 
