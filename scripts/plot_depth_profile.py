@@ -64,7 +64,9 @@ def main(files, out, time_break, depth):
             platform = ds.subsite
             node = ds.node
             sensor = ds.sensor
-            save_dir = os.path.join(out, ds.subsite, ds.node, ds.stream, 'depth_profiles')
+            deployment = 'D0000{}'.format(str(np.unique(ds.deployment)[0]))
+            stream = ds.stream
+            save_dir = os.path.join(out, platform, deployment, node, sensor, stream, 'depth_profiles')
             cf.create_dir(save_dir)
 
             # try:
@@ -85,10 +87,11 @@ def main(files, out, time_break, depth):
             # tI = (pd.to_datetime(t0) + (pd.to_datetime(t1) - pd.to_datetime(t0)) / 2)
             # time_list = [[t0, t1], [t0, tI], [tI, t1]]
 
+
             times = np.unique(ds[time_break])
-            
             for t in times:
                 time_ind = t == ds[time_break].data
+
                 for var in sci_vars:
                     x = dict(data=ds['time'].data[time_ind],
                              info=dict(label='Time', units='GMT'))
@@ -106,7 +109,6 @@ def main(files, out, time_break, depth):
                     y = dict(data=ds[depth].data[time_ind], info=dict(label='Pressure', units='dbar', var=var,
                                                                 platform=platform, node=node, sensor=sensor))
 
-                    
                     try:
                         z_lab = sci.long_name
                     except AttributeError:
@@ -132,8 +134,10 @@ def main(files, out, time_break, depth):
                 del x, y
 
 if __name__ == '__main__':
-    depth = 'seawater_pressure'
-    times = 'time.month'
-    file = '/Users/knuth/Desktop/CTDPFA302/deployment0001_RS03AXPS-SF03A-2A-CTDPFA302-streamed-ctdpf_sbe43_sample_20150701T110002.425051-20150708T190645.135262.nc'
-    main(file, '/Users/knuth/Desktop/CTDPFA302/plots', times, depth)
-
+    nc_file = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.05.15T14.27.00-nc-links.txt'
+    output_location = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/'
+    depth = 'pressure'#''ctdpf_ckl_seawater_pressure'#'sci_water_pressure_dbar'
+    # start_time = '2013-01-01'
+    # end_time = '2017-05-21'
+    times = 'time.month'  #example: 'time.month' Must be None to set interval between start_time and end_time
+    main(nc_file, output_location, times, depth) #start_time, end_time,
