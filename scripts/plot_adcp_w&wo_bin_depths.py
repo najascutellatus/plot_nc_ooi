@@ -87,8 +87,8 @@ def main(files, out, east_var, north_var, up_var, err_var):
 
             north = ds_disk[north_var]
             east = ds_disk[east_var]
-            # up = ds_disk[up_var]
-            # error = ds_disk[err_var]
+            up = ds_disk[up_var]
+            error = ds_disk[err_var]
 
             try:
                 bins = ds_disk['bin_depths']
@@ -116,29 +116,35 @@ def main(files, out, east_var, north_var, up_var, err_var):
             #bins = dict(data=bins.data.T, info=dict(label=bins.long_name, units=bins.units))
             north = dict(data=north.data.T, info=dict(label=north.long_name, units=north.units))
             east = dict(data=east.data.T, info=dict(label=east.long_name, units=east.units))
-            # up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
-            # error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
+            up = dict(data=up.data.T, info=dict(label=up.long_name, units=up.units))
+            error = dict(data=error.data.T, info=dict(label=error.long_name, units=error.units))
 
-            sname = save_pre + 'ADCP'
+            sname_ew = save_pre + 'E-W-ADCP'
             title = title_pre
             fig, axs = pf.adcp(time, bins, north, east, title)
             pf.resize(width=12, height=8.5)  # Resize figure
-            pf.save_fig(save_dir, sname, res=250)  # Save figure
+            pf.save_fig(save_dir, sname_ew, res=250)  # Save figure
+
+            sname_ur = save_pre + 'U-R-ADCP'
+            fig, axs = pf.adcp(time, bins, up, error, title)
+            pf.resize(width=12, height=8.5)  # Resize figure
+            pf.save_fig(save_dir, sname_ur, res=250)  # Save figure
+
             plt.close('all')
-                # del sub_ds, x, y
+            # del sub_ds, x, y
 
 
 if __name__ == '__main__':
     # main("http://opendap.oceanobservatories.org:8090/thredds/dodsC/ooi/friedrich-knuth-gmail/20161007T055559-RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam/deployment0000_RS01SBPS-PC01A-05-ADCPTD102-streamed-adcp_velocity_beam.ncml", ".")
-    http_link = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.14T14.26.00CP02PMUI-RII01-02-ADCPTG010-telemetered-adcps_jln_stc_instrument-nc-links.txt'
-    #http_link = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.14T14.43.00CP02PMUI-RII01-02-ADCPTG010-recovered_inst-adcp_velocity_earth-nc-links.txt'
+    #http_link = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.14T14.26.00CP02PMUI-RII01-02-ADCPTG010-telemetered-adcps_jln_stc_instrument-nc-links.txt'
+    http_link = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/file_list/2017.06.14T14.43.00CP02PMUI-RII01-02-ADCPTG010-recovered_inst-adcp_velocity_earth-nc-links.txt'
     save_dir = '/Users/leila/Documents/OOI_GitHub_repo/output/plots/'
-    # east_var = 'eastward_seawater_velocity'
-    # north_var = 'northward_seawater_velocity'
-    # up_var = 'upward_seawater_velocity'
-    # err_var = 'error_seawater_velocity'
-    east_var = 'adcps_jln_eastward_seawater_velocity2'
-    north_var = 'adcps_jln_northward_seawater_velocity2'
-    up_var = 'adcps_jln_upward_seawater_velocity2'
-    err_var = 'adcps_jln_error_velocity2'
+    east_var = 'eastward_seawater_velocity'
+    north_var = 'northward_seawater_velocity'
+    up_var = 'upward_seawater_velocity'
+    err_var = 'error_seawater_velocity'
+    # east_var = 'adcps_jln_eastward_seawater_velocity2'
+    # north_var = 'adcps_jln_northward_seawater_velocity2'
+    # up_var = 'adcps_jln_upward_seawater_velocity2'
+    # err_var = 'adcps_jln_error_velocity2'
     main(http_link, save_dir, east_var, north_var, up_var, err_var)
