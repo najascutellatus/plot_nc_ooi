@@ -6,7 +6,7 @@ This toolbox contains python scripts that plot netCDF datasets.
 - [Installation](#installation)
 - [Functions](#functions)
 - [Scripts](#scripts)
-- [Data Format](#data format)
+- [Data Format](#data-format)
 
 ### Introduction
 This toolbox was created for the Ocean Observatories Initiative (OOI) data review team to easily plot netCDF files located on THREDDS Data Servers (TDS) via OPeNDAP. This toolbox is built on top of matplotlib to provide an easier way to make 'pretty' plots of scientific data. These functions automatically scale axes and add titles/labels to plots provided the data is in a dictionary format that the toolbox functions are designed to read.
