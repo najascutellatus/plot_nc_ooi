@@ -1,7 +1,7 @@
 click==6.4
 cycler==0.10.0
 matplotlib==1.5.1
-numpy==1.10.4
+numpy==1.21.0
 pandas==0.18.0
 thredds-crawler==1.2.0
 xarray==0.8.2
